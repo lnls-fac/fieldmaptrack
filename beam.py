@@ -13,7 +13,7 @@ class Beam:
 
     @staticmethod
     def calc_brho(energy):
-        electron_rest_energy_GeV = units.joule_2_eV(consts.electron_rest_energy) / 1e9
+        electron_rest_energy_GeV = units.joule_2_eV * consts.electron_rest_energy / 1e9
         gamma    = energy/electron_rest_energy_GeV
         beta     = math.sqrt(((gamma-1.0)/gamma)*((gamma+1.0)/gamma))
         velocity = consts.light_speed * beta

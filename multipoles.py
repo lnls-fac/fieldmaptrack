@@ -151,13 +151,16 @@ class Multipoles:
         grid_max = max(self.perpendicular_grid)
         normal_field_monomials = self.normal_field_fitting_monomials
         skew_field_monomials = self.skew_field_fitting_monomials
+
+
         all_monomials = sorted(set(list(normal_field_monomials) + list(skew_field_monomials)))
         r = ''
-        r += '{0:<35s} {1}'.format('perpendicular_grid:', '{0} points in [{1:+f},{2:+f}] mm'.format(nrpts, grid_min, grid_max))
+        r +=   '{0:<35s} {1} mm'.format('effective_length:', 1000*self.effective_length)
+        r += '\n{0:<35s} {1}'.format('perpendicular_grid:', '{0} points in [{1:+f},{2:+f}] mm'.format(nrpts, grid_min, grid_max))
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_normal', 1e4*self.max_fit_error_normal[0], 1e4*abs(self.max_fit_error_normal[1]))
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_skew', 1e4*self.max_fit_error_skew[0], 1e4*abs(self.max_fit_error_skew[1]))
         r += '\n{0:<35s} {1} mm'.format('r0_for_relative_multipoles', self.r0)
-        r += '\n{0:<35s} {1}'.format('main monomial', 'n = {0} {1}'.format(self.main_monomial, '()'))
+        r += '\n{0:<35s} {1}'.format('main monomial', 'n = {0}, skew:{1}'.format(self.main_monomial, self.main_monomial_is_skew))
         r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('                   ', 'MaxAbs_Nn', 'Integ_Nn', 'MaxAbs_Sn', 'Integ_Sn', 'Nn/N0(@r0)', 'Sn/S0(@r0)')
         r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('<multipole_order n>', '[T/m^n]', '[T.m/m^n]', '[T/m^n]', '[T.m/m^n]', '[]', '[]')
         for i in range(len(all_monomials)):
@@ -177,7 +180,9 @@ class Multipoles:
             except ValueError:
                 max_poly_a, integ_poly_a, integ_poly_a_relative = '---','---','---'
             r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('n={0:02d}:'.format(n), max_poly_b, integ_poly_b, max_poly_a, integ_poly_a, integ_poly_b_relative, integ_poly_a_relative)
+
         return r
+
 
     def save(self, filename):
 

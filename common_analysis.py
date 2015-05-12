@@ -153,6 +153,14 @@ def multipoles_analysis(config):
     else:
         config.multipoles.calc_multipoles_integrals_relative(config.multipoles.normal_multipoles_integral, main_monomial = main_monomial, r0 = config.multipoles_r0, is_skew = False)
 
+    monomials = config.multipoles.normal_field_fitting_monomials
+    idx_n = monomials.index(main_monomial)
+    idx_z = list(config.traj.s).index(0.0)
+    main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
+    config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
+    #print(config.multipoles.effective_length)
+
+
     # saves multipoles to file
     config.multipoles.save('multipoles.txt')
 

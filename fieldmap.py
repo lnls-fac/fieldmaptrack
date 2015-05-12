@@ -145,11 +145,6 @@ class FieldMap:
         self.by = [np.transpose(self.by)]
         self.bz = [np.transpose(self.bz)]
 
-
-
-
-
-
         ''' header section '''
         lines = content[:idx].split('\n')
         for line in lines:
@@ -195,6 +190,25 @@ class FieldMap:
                 except ValueError:
                     self.current = None
                 continue
+            if cmd == 'ni[a.esp]:':
+                try:
+                    self.ni = float(words[1]) #[]
+                except:
+                    self.ni = None
+                continue
+            if cmd == 'corrente_aux[a]:':
+                try:
+                    self.current_aux = words[1]#[A]
+                except ValueError:
+                    self.current_aux = None
+                continue
+            if cmd == 'ni_aux[a.esp]:':
+                try:
+                    self.ni_aux = float(words[1]) #[]
+                except:
+                    self.ni_aux = None
+                continue
+
 
     def interpolate_set(self, points):
 
@@ -232,6 +246,9 @@ class FieldMap:
         r += '\n{0:<35s} {1}'.format('magnet_label:', self.magnet_label)
         r += '\n{0:<35s} {1} mm'.format('magnet_length:', self.length)
         r += '\n{0:<35s} {1} A'.format('main_coil_current:', self.current)
+        r += '\n{0:<35s} {1} A'.format('main_coil_NI:', self.ni)
+        r += '\n{0:<35s} {1} A'.format('aux_coil_current:', self.current_aux)
+        r += '\n{0:<35s} {1} A'.format('aux_coil_NI:', self.ni_aux)
         try:
             r += '\n{0:<35s} {1} mm'.format('magnetic_gap:', self.gap)
         except:
@@ -259,6 +276,5 @@ class FieldMap:
         np.amin(self.bx[self.ry_zero]), np.amax(self.bx[self.ry_zero]), min(self.bx[self.ry_zero][self.rx_zero]), max(self.bx[self.ry_zero][self.rx_zero]))
         r += '\n{0:<35s} (min:{1:+8.5f} max:{2:+8.5f}) (min:{3:+8.5f} max:{4:+8.5f}) Tesla'.format('bz@(all)(axis):',
         np.amin(self.bz[self.ry_zero]), np.amax(self.bz[self.ry_zero]), min(self.bz[self.ry_zero][self.rx_zero]), max(self.bz[self.ry_zero][self.rx_zero]))
-
 
         return r
