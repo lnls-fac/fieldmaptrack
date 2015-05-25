@@ -155,7 +155,10 @@ class Multipoles:
 
         all_monomials = sorted(set(list(normal_field_monomials) + list(skew_field_monomials)))
         r = ''
-        r +=   '{0:<35s} {1} mm'.format('effective_length:', 1000*self.effective_length)
+        try:
+            r +=   '{0:<35s} {1} mm'.format('effective_length:', 1000*self.effective_length)
+        except:
+            pass
         r += '\n{0:<35s} {1}'.format('perpendicular_grid:', '{0} points in [{1:+f},{2:+f}] mm'.format(nrpts, grid_min, grid_max))
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_normal', 1e4*self.max_fit_error_normal[0], 1e4*abs(self.max_fit_error_normal[1]))
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_skew', 1e4*self.max_fit_error_skew[0], 1e4*abs(self.max_fit_error_skew[1]))

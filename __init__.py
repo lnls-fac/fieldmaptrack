@@ -5,3 +5,5 @@ from fieldmaptrack.track import SerretFrenetCoordSystem
 from fieldmaptrack.track import Trajectory
 from fieldmaptrack.track import TrackException
 from fieldmaptrack.multipoles import Multipoles
+
+from . import common_analysis
