@@ -1,0 +1,21 @@
+# ==========================
+# fma_rawfield.py input file
+# Date: 2015-01-08
+# Accelerator Physics LNLS
+# ==========================
+
+# --- Summary ---
+#
+# This script integrates fitted multipoles at each segment of the hard-edge model 
+
+# --- Input parameters ---
+
+# each analysis has an identity label used for naming output files
+
+  config_label                      'bc_model2_controlgap_50mm_modelo_mecanico'
+
+
+# list with lengths of model segments
+
+   model_segmentation               (125.394/2.0, )     # lengths of segments for half-model (rz>0)
+

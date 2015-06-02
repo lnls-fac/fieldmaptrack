@@ -20,5 +20,13 @@ setup(
     ],
     packages=['fieldmaptrack'],
     package_data={'fieldmaptrack': ['VERSION']},
+    scripts=[
+        'scripts/fma-analysis.py',
+        'scripts/fma-model.py',
+        'scripts/fma-multipoles.py',
+        'scripts/fma-rawfield.py',
+        'scripts/fma-sextupole.py',
+        'scripts/fma-trajectory.py'
+    ],
     zip_safe=False,
 )

@@ -1,0 +1,39 @@
+# ==========================
+# fma_rawfield.py input file
+# Date: 2015-01-08
+# Accelerator Physics LNLS
+# ==========================
+
+# --- Summary ---
+#
+# this is the input file for the fma_multipoles.py script
+# this script calculates the multipoles around the reference trajectory.
+
+
+# --- Input parameters ---
+
+# each analysis has an identity label used for naming output files
+
+  config_label                      'bc_model2_controlgap_50mm_modelo_mecanico'
+
+
+# the multipoles (m1,m2,...) to be calculated are defined by a list of position x exponents (n1,n2,...):
+# By = m1 * x^n1 + m2 * x^n2 + ...
+
+  multipoles_normal_field_fitting_monomials      (0,1,2,3,4,5,6,7,8,9,10)       # monomials to be included in the polynomial fit of normal multipoles
+  multipoles_skew_field_fitting_monomials        ()                             # monomials to be includee in the polynomial fit of skew multiples
+
+# grid of perpendicular points around each point of the reference trajectory for the polynomial fit of By and Bx
+
+  multipoles_perpendicular_grid     np.linspace(-10,10,41)          # grid of points on perpendicular line to ref trajectory [mm]
+
+# after multipole coeffs are calculated, their normalized strengths at perp. position r0 are calculated (as defined in tracy)
+
+  multipoles_r0                    11.7                            # [mm] horizontal position at which polynomial fields are calculated relative to the principal multipole
+
+
+# integrated residual field (converted to kick angle) calculated from fitted multipoles and
+# from integrated fieldmap are compared. The parameter below lists the monomials which are
+# supposed to define the main field. The rest makes up for the residual field
+
+  multipoles_main_monomials         [0,2]
