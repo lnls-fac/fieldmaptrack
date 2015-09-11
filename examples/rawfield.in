@@ -16,18 +16,18 @@
 
 # each analysis has an identity label used for naming output files
 
-  config_label             'bc_model2_controlgap_50mm_modelo_mecanico'
+  config_label             'sx_model1_eje'
 
 
 # the next parameter specifies the type of magnet to be analysid. 
 # each type may have its own particular algorithms to be applied
 
-  magnet_type              'dipole'
+  magnet_type              'sextupole'
 
 
 # the full name of the file that contains the field map
 
-  fmap_filename            '/home/fac_files/data/sirius/si/magnet_modelling/bc/fieldmaps/2014-12-15_Dipolo_Anel_BC_Modelo2_gap_lateral_50mm_modelo_mecanico_-50_50mm_-2000_2000mm_inclinado_450urad.txt'
+  fmap_filename            '../fieldmaps/2015-08-28 Sextupolo_Booster_S_Modelo 1_-20_20mm_-300_300mm_135A_extracao.txt'
 
 
 # Runge-kutta algorithm used for the integration of the eqs. of motion needs to know

@@ -12,10 +12,10 @@
 
 # each analysis has an identity label used for naming output files
 
-  config_label                      'bc_model2_controlgap_50mm_modelo_mecanico'
+  config_label                      'sx_model1_eje'
 
 
 # list with lengths of model segments
 
-   model_segmentation               (125.394/2.0, )     # lengths of segments for half-model (rz>0)
+   model_segmentation               [50,50,10,10]
 

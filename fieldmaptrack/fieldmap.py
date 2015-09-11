@@ -226,9 +226,13 @@ class FieldMap:
         rz = -S * (rx_global - self.translation[0]) + C * (rz_global - self.translation[1])
 
         if rx < self.rx_min:
-            raise OutOfRangeRxMin('rx = {0:f} < rx_min = {1:f} [mm]'.format(rx, self.rx_min))
+            #print('temporary in fieldmap.py!')
+            return (0,0,0)
+            #raise OutOfRangeRxMin('rx = {0:f} < rx_min = {1:f} [mm]'.format(rx, self.rx_min))
         if rx > self.rx_max:
-            raise OutOfRangeRxMax('rx = {0:f} > rx_max = {1:f} [mm]'.format(rx, self.rx_max))
+            #print('temporary in fieldmap.py!')
+            return (0,0,0)
+            #raise OutOfRangeRxMax('rx = {0:f} > rx_max = {1:f} [mm]'.format(rx, self.rx_max))
 
         field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
 

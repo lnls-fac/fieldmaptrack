@@ -83,7 +83,7 @@ class Trajectory:
         # calcs magnetic field on current position
         try:
             bx,by,bz = self.fieldmap.interpolate(rx,ry,rz)
-        except (fieldmap.OutOfRangeRx, fieldmap.OutOfRangeRy):
+        except (fieldmap.OutOfRangeRx, fieldmap.OutOfRangeRxMin, fieldmap.OutOfRangeRy):
             raise TrackException('extrapolation at ' + str((rx,ry,rz)))
         except fieldmap.OutOfRangeRz:
             bx,by,bz = 0.0,0.0,0.0
@@ -208,7 +208,10 @@ class Trajectory:
             self.s.append(s)
             self.rx.append(rx), self.ry.append(ry), self.rz.append(rz)
             self.px.append(px), self.py.append(py), self.pz.append(pz)
-            self.bx.append(bx[0]), self.by.append(by[0]), self.bz.append(bz[0])
+            try:
+                self.bx.append(bx[0]), self.by.append(by[0]), self.bz.append(bz[0])
+            except:
+                self.bx.append(bx), self.by.append(by), self.bz.append(bz)
 
             # propagates to next point
             rx, ry, rz, px, py, pz = p0 + (h/6.0) * (k1 + 2*k2 + 2*k3 + k4)
@@ -246,7 +249,8 @@ class Trajectory:
         ref_point = self.calc_reference_point()
 
         r  = ''
-        r +=   '{0:<35s} {1:+.4e} deg.'.format('horizontal_deflection_angle:', theta_x * (180.0/math.pi))
+        r +=   '{0:<35s} {1:.3f} GeV'.format('beam_energy:', self.beam.energy)
+        r += '\n{0:<35s} {1:+.4e} deg.'.format('horizontal_deflection_angle:', theta_x * (180.0/math.pi))
         r += '\n{0:<35s} {1:+.4e} deg.'.format('vertical_deflection_angle:', theta_y * (180.0/math.pi))
         r += '\n{0:<35s} {1} mm'.format('trajectory_length:', self.s[-1]-self.s[0])
         r += '\n{0:<35s} {1}'.format('trajectory_nrpts:', len(self.s))

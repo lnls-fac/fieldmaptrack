@@ -11,7 +11,7 @@ SCRIPTS = $(GENERALSCRIPTS)\
 FULLSCRIPTS = $(addprefix $(DEST_DIR)/, $(SCRIPTS))
 
 install: uninstall $(SCRIPTS)
-	cp $(SCRIPTS) $(DEST_DIR)
+	cp $(SCRIPTS) $(DEST_DIR); cd $(DEST_DIR); chmod a+x $(SCRIPTS)
 
 uninstall:
 	-rm -rf $(FULLSCRIPTS)

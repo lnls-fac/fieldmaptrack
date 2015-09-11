@@ -500,7 +500,7 @@ def model_analysis(config):
     nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
 
     monomials = []
-    strapp = '{0:^6s} {1:^14s} '
+    strapp = '{0:^8s} {1:^14s} '
     for i in range(nr_monomials):
         strapp += '{'+'{0}'.format(2+i)+':^14s} '
         monomials.append('PolynomB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
@@ -508,10 +508,10 @@ def model_analysis(config):
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection
 
-    print('--- model polynom_b (rz > 0). units: [mm] for length, [rad] for angle and [m],[T] for polynom_b ---')
-    print(strapp.format('len[mm]', 'angle[rad]', *monomials))
+    print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m],[T] for polynom_b ---')
+    print(strapp.format('len[m]', 'angle[rad]', *monomials))
 
-    fstr = '{0:<7.4f} {1:<+14.06e} '
+    fstr = '{0:<8.5f} {1:<+14.06e} '
     for i in range(m.shape[0]):
         fstr += '{'+str(i+2)+':<+14.6e} '
     for i in range(len(l)):

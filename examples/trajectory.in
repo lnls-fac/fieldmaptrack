@@ -27,7 +27,7 @@
 
 # each analysis has an identity label used for naming output files
 
-  config_label             'bc_model2_controlgap_50mm_modelo_mecanico'
+  config_label             	  'sx_model1_eje'
 
 
 # beam energy
@@ -48,7 +48,7 @@
 # fieldmap so that the total trajectory deflection will exactly match the nominal deflection
 
   traj_is_reference_traj          False
-  model_nominal_angle             1.4                           # [deg] model nominal deflection angle of the magnet
+  model_nominal_angle             0.0                           # [deg] model nominal deflection angle of the magnet
 
 # There is the option to restrain the trajectory to the midplane (y = 0 mm) of the magnet 
 
@@ -58,7 +58,7 @@
 # There is the option to serach for a initial rx position that will result in a trajectory that
 # is centered in the good-field region of the magnet (around rx == 0)
 
-  traj_center_sagitta_flag        True
+  traj_center_sagitta_flag        False
 
 
 # The RK algorithm always integrates the trajectory from the center of the magnet (z = s = 0 mm) 
@@ -67,7 +67,7 @@
 # the z coordinate of the particle reaches the fieldmap bound.
 
   traj_init_rx                    None                          # [mm] init_rx at z = s = 0 mm (center of magnet)
-  traj_rk_s_step                  1.0                           # [mm]
+  traj_rk_s_step                  0.1                           # [mm]
   traj_rk_length                  None                          # [mm]
   traj_rk_nrpts                   None 
 
