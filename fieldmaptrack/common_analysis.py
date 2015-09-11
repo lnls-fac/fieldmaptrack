@@ -145,20 +145,23 @@ def multipoles_analysis(config):
                                          skew_field_fitting_monomials=config.multipoles_skew_field_fitting_monomials)
     config.multipoles.calc_multipoles(is_ref_trajectory_flag = False)
     config.multipoles.calc_multipoles_integrals()
-    #main_monomial = {'corrector':0, 'dipole':0, 'quadrupole':1, 'sextupole':2}[config.magnet_type]
     main_monomial = config.normalization_monomial
     normalization_is_skew = config.normalization_is_skew
     if normalization_is_skew:
         config.multipoles.calc_multipoles_integrals_relative(config.multipoles.skew_multipoles_integral, main_monomial = main_monomial, r0 = config.multipoles_r0, is_skew = True)
+        monomials = config.multipoles.skew_field_fitting_monomials
+        idx_n = monomials.index(main_monomial)
+        idx_z = list(config.traj.s).index(0.0)
+        main_multipole_center = config.multipoles.skew_multipoles[idx_n,idx_z]
+        config.multipoles.effective_length = config.multipoles.skew_multipoles_integral[idx_n] / main_multipole_center
     else:
         config.multipoles.calc_multipoles_integrals_relative(config.multipoles.normal_multipoles_integral, main_monomial = main_monomial, r0 = config.multipoles_r0, is_skew = False)
-
-    monomials = config.multipoles.normal_field_fitting_monomials
-    idx_n = monomials.index(main_monomial)
-    idx_z = list(config.traj.s).index(0.0)
-    main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
-    config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
-    #print(config.multipoles.effective_length)
+        monomials = config.multipoles.normal_field_fitting_monomials
+        idx_n = monomials.index(main_monomial)
+        idx_z = list(config.traj.s).index(0.0)
+        main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
+        config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
+        
 
 
     # saves multipoles to file
