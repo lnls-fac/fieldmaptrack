@@ -42,7 +42,7 @@ def raw_fieldmap_analysis(config):
     # loads fieldmap from file
     config.fmap = fieldmaptrack.FieldMap(config.fmap_filename)
 
-    # plots basic data, longitudinal profile at (x,y) = (0,0)
+    # plots basic data, by longitudinal profile at (x,y) = (0,0)
     try:
         config.config_fig_number += 1
     except:
@@ -55,7 +55,20 @@ def raw_fieldmap_analysis(config):
     plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'by-vs-rz.pdf')
     plt.clf()
 
-    # plots basic data, transversal profile at (y,z) = (0,0)
+    # plots basic data, bx longitudinal profile at (x,y) = (0,0)
+    try:
+        config.config_fig_number += 1
+    except:
+        config.config_fig_number = 1
+    x,y = config.fmap.rz, config.fmap.bx[config.fmap.ry_zero][config.fmap.rx_zero,:]
+    plt.plot(x,y)
+    plt.grid(True)
+    plt.xlabel('rz [mm]'), plt.ylabel('bx [T]')
+    plt.title(config.config_label + '\n' + 'Longitudinal profile of horizontal field')
+    plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'bx-vs-rz.pdf')
+    plt.clf()
+
+    # plots basic data, by transversal profile at (y,z) = (0,0)
     try:
         config.config_fig_number += 1
     except:
@@ -66,6 +79,19 @@ def raw_fieldmap_analysis(config):
     plt.xlabel('rx [mm]'), plt.ylabel('by [T]')
     plt.title(config.config_label + '\n' + 'Transverse profile of vertical field')
     plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) +  'by-vs-rx.pdf')
+    plt.clf()
+
+    # plots basic data, bx transversal profile at (y,z) = (0,0)
+    try:
+        config.config_fig_number += 1
+    except:
+        config.config_fig_number = 1
+    x, y = config.fmap.rx, config.fmap.bx[config.fmap.ry_zero][:,config.fmap.rz_zero]
+    plt.plot(x,y)
+    plt.grid(True)
+    plt.xlabel('rx [mm]'), plt.ylabel('bx [T]')
+    plt.title(config.config_label + '\n' + 'Transverse profile of horizontal field')
+    plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) +  'bx-vs-rx.pdf')
     plt.clf()
 
     # calculates missing integrals
@@ -161,7 +187,7 @@ def multipoles_analysis(config):
         idx_z = list(config.traj.s).index(0.0)
         main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
         config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
-        
+
 
 
     # saves multipoles to file
