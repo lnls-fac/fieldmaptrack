@@ -163,7 +163,7 @@ class Trajectory:
                     s_nrpts = 1 + int(s_length / s_step)
 
 
-        # inits auxilliary data structures
+        # inits auxiliary data structures
 
         self.s_step = s_step
         self.force_midplane = force_midplane
