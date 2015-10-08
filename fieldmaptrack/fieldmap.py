@@ -173,7 +173,10 @@ class FieldMap:
                 self.magnet_label = ' '.join(words[1:])
                 continue
             if cmd == 'gap[mm]:':
-                self.gap = float(words[1]) #[mm]
+                try:
+                    self.gap = float(words[1]) #[mm]
+                except ValueError:
+                    self.gap = None  
                 continue
             if cmd == 'gap_controle[mm]:':
                 try:
