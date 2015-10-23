@@ -138,11 +138,11 @@ def trajectory_analysis(config):
     print(config.traj)
     print('{0:<35s} {1} mm'.format('sagitta:', config.traj_sagitta))
 
-    # saves trajectory in file
-    config.traj.save(filename='trajectory.txt')
-
-    # saves field on trajectory in file
-    config.traj.save_field(filename='field_on_trajectory.txt')
+    if not config.interactive_mode:
+        # saves trajectory in file
+        config.traj.save(filename='trajectory.txt')
+        # saves field on trajectory in file
+        config.traj.save_field(filename='field_on_trajectory.txt')
 
     return config
 
@@ -160,23 +160,24 @@ def multipoles_analysis(config):
     #config.multipoles.calc_hardedge_polynomials(config.model_hardedge_length)
 
     # saves multipoles to file
-    config.multipoles.save('multipoles.txt')
+    if not config.interactive_mode: config.multipoles.save('multipoles.txt')
 
     # prints basic information on multipoles
     # ======================================
     print('--- multipoles on reference trajectory (rz > 0) ---')
     print(config.multipoles)
 
-    # plots normal multipoles
-    config = plot_normal_multipoles(config)
+    if not config.interactive_mode:
+        # plots normal multipoles
+        config = plot_normal_multipoles(config)
 
-    # plots skew multipoles
-    config = plot_skew_multipoles(config)
+        # plots skew multipoles
+        config = plot_skew_multipoles(config)
 
-    # plots residual normal field
-    #config = plot_residual_field_in_curvilinear_system(config)
-    config = plot_residual_normal_field(config)
-    # plots residual skew field
-    config = plot_residual_skew_field(config)
+        # plots residual normal field
+        #config = plot_residual_field_in_curvilinear_system(config)
+        config = plot_residual_normal_field(config)
+        # plots residual skew field
+        config = plot_residual_skew_field(config)
 
     return config

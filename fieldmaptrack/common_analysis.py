@@ -39,60 +39,63 @@ def get_analysis_symbol(magnet_type):
 def raw_fieldmap_analysis(config):
     """does raw fieldmap analysis"""
 
+    if not hasattr(config, 'interactive_mode'): config.interactive_mode = False
+
     # loads fieldmap from file
     config.fmap = fieldmaptrack.FieldMap(config.fmap_filename)
 
     # plots basic data, by longitudinal profile at (x,y) = (0,0)
-    try:
-        config.config_fig_number += 1
-    except:
-        config.config_fig_number = 1
-    x,y = config.fmap.rz, config.fmap.by[config.fmap.ry_zero][config.fmap.rx_zero,:]
-    plt.plot(x,y)
-    plt.grid(True)
-    plt.xlabel('rz [mm]'), plt.ylabel('by [T]')
-    plt.title(config.config_label + '\n' + 'Longitudinal profile of vertical field')
-    plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'by-vs-rz.pdf')
-    plt.clf()
+    if not config.interactive_mode:
+        try:
+            config.config_fig_number += 1
+        except:
+            config.config_fig_number = 1
+        x,y = config.fmap.rz, config.fmap.by[config.fmap.ry_zero][config.fmap.rx_zero,:]
+        plt.plot(x,y)
+        plt.grid(True)
+        plt.xlabel('rz [mm]'), plt.ylabel('by [T]')
+        plt.title(config.config_label + '\n' + 'Longitudinal profile of vertical field')
+        plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'by-vs-rz.pdf')
+        plt.clf()
 
-    # plots basic data, bx longitudinal profile at (x,y) = (0,0)
-    try:
-        config.config_fig_number += 1
-    except:
-        config.config_fig_number = 1
-    x,y = config.fmap.rz, config.fmap.bx[config.fmap.ry_zero][config.fmap.rx_zero,:]
-    plt.plot(x,y)
-    plt.grid(True)
-    plt.xlabel('rz [mm]'), plt.ylabel('bx [T]')
-    plt.title(config.config_label + '\n' + 'Longitudinal profile of horizontal field')
-    plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'bx-vs-rz.pdf')
-    plt.clf()
+        # plots basic data, bx longitudinal profile at (x,y) = (0,0)
+        try:
+            config.config_fig_number += 1
+        except:
+            config.config_fig_number = 1
+        x,y = config.fmap.rz, config.fmap.bx[config.fmap.ry_zero][config.fmap.rx_zero,:]
+        plt.plot(x,y)
+        plt.grid(True)
+        plt.xlabel('rz [mm]'), plt.ylabel('bx [T]')
+        plt.title(config.config_label + '\n' + 'Longitudinal profile of horizontal field')
+        plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'bx-vs-rz.pdf')
+        plt.clf()
 
-    # plots basic data, by transversal profile at (y,z) = (0,0)
-    try:
-        config.config_fig_number += 1
-    except:
-        config.config_fig_number = 1
-    x, y = config.fmap.rx, config.fmap.by[config.fmap.ry_zero][:,config.fmap.rz_zero]
-    plt.plot(x,y)
-    plt.grid(True)
-    plt.xlabel('rx [mm]'), plt.ylabel('by [T]')
-    plt.title(config.config_label + '\n' + 'Transverse profile of vertical field')
-    plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) +  'by-vs-rx.pdf')
-    plt.clf()
+        # plots basic data, by transversal profile at (y,z) = (0,0)
+        try:
+            config.config_fig_number += 1
+        except:
+            config.config_fig_number = 1
+        x, y = config.fmap.rx, config.fmap.by[config.fmap.ry_zero][:,config.fmap.rz_zero]
+        plt.plot(x,y)
+        plt.grid(True)
+        plt.xlabel('rx [mm]'), plt.ylabel('by [T]')
+        plt.title(config.config_label + '\n' + 'Transverse profile of vertical field')
+        plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) +  'by-vs-rx.pdf')
+        plt.clf()
 
-    # plots basic data, bx transversal profile at (y,z) = (0,0)
-    try:
-        config.config_fig_number += 1
-    except:
-        config.config_fig_number = 1
-    x, y = config.fmap.rx, config.fmap.bx[config.fmap.ry_zero][:,config.fmap.rz_zero]
-    plt.plot(x,y)
-    plt.grid(True)
-    plt.xlabel('rx [mm]'), plt.ylabel('bx [T]')
-    plt.title(config.config_label + '\n' + 'Transverse profile of horizontal field')
-    plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) +  'bx-vs-rx.pdf')
-    plt.clf()
+        # plots basic data, bx transversal profile at (y,z) = (0,0)
+        try:
+            config.config_fig_number += 1
+        except:
+            config.config_fig_number = 1
+        x, y = config.fmap.rx, config.fmap.bx[config.fmap.ry_zero][:,config.fmap.rz_zero]
+        plt.plot(x,y)
+        plt.grid(True)
+        plt.xlabel('rx [mm]'), plt.ylabel('bx [T]')
+        plt.title(config.config_label + '\n' + 'Transverse profile of horizontal field')
+        plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) +  'bx-vs-rx.pdf')
+        plt.clf()
 
     # calculates missing integrals
     if config.fmap_extrapolation_flag:
@@ -154,10 +157,10 @@ def trajectory_analysis(config):
     print(config.traj)
 
     # saves trajectory in file
-    config.traj.save(filename='trajectory.txt')
+    if not config.interactive_mode: config.traj.save(filename='trajectory.txt')
 
     # saves field on trajectory in file
-    config.traj.save_field(filename='field_on_trajectory.txt')
+    if not config.interactive_mode: config.traj.save_field(filename='field_on_trajectory.txt')
 
     return config
 
@@ -191,22 +194,22 @@ def multipoles_analysis(config):
 
 
     # saves multipoles to file
-    config.multipoles.save('multipoles.txt')
+    if not config.interactive_mode: config.multipoles.save('multipoles.txt')
 
     # prints basic information on multipoles
     # ======================================
     print('--- multipoles on reference trajectory (rz > 0) ---')
     print(config.multipoles)
 
-    # plots normal multipoles
-    config = plot_normal_multipoles(config)
-    # plots skew multipoles
-    config = plot_skew_multipoles(config)
-
-    # plots residual normal field
-    config = plot_residual_normal_field(config)
-    # plots residual skew field
-    config = plot_residual_skew_field(config)
+    if not config.interactive_mode:
+        # plots normal multipoles
+        config = plot_normal_multipoles(config)
+        # plots skew multipoles
+        config = plot_skew_multipoles(config)
+        # plots residual normal field
+        config = plot_residual_normal_field(config)
+        # plots residual skew field
+        config = plot_residual_skew_field(config)
 
     return config
 
