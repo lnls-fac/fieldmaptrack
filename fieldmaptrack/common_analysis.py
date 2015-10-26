@@ -42,7 +42,10 @@ def raw_fieldmap_analysis(config):
     if not hasattr(config, 'interactive_mode'): config.interactive_mode = False
 
     # loads fieldmap from file
-    config.fmap = fieldmaptrack.FieldMap(config.fmap_filename)
+    if hasattr(config, 'fmap_rescale_factor'):
+        config.fmap = fieldmaptrack.FieldMap(config.fmap_filename, rescale_factor = config.fmap_rescale_factor)
+    else:
+        config.fmap = fieldmaptrack.FieldMap(config.fmap_filename)
 
     # plots basic data, by longitudinal profile at (x,y) = (0,0)
     if not config.interactive_mode:

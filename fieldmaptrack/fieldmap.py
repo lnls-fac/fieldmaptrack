@@ -56,13 +56,15 @@ class FieldMap:
                  field_function = None,
                  polyfit_exponents = None,
                  rotation = 0.0,
-                 translation = (0,0)):
+                 translation = (0,0),
+                 rescale_factor = 1.0):
 
         self.filename = fname
         self.fieldmap_label = None
         self.field_function = field_function
         self.rotation = rotation
         self.translation = translation
+        self.rescale_factor = rescale_factor
 
         self.rx,       self.ry,       self.rz        = None, None, None # unique and sorted 1D numpy arrays with values of corresponding coordinates
         self.rx_nrpts, self.ry_nrpts, self.rz_nrpts  = None, None, None # number of distinct values of each coordinate in the fieldmap
@@ -135,6 +137,12 @@ class FieldMap:
         self.bx, self.by, self.bz = data[:,3].view(), data[:,4].view(), data[:,5].view()
         self.bx.shape, self.by.shape, self.bz.shape = (-1,self.rx_nrpts), (-1,self.rx_nrpts), (-1,self.rx_nrpts)
 
+        # rescale field
+        if self.rescale_factor != 1.0:
+            self.bx *= self.rescale_factor
+            self.by *= self.rescale_factor
+            self.bz *= self.rescale_factor
+
         # lookup tables for field interpolation
         kind = 'cubic'
         self.bxf = interpolate.interp2d(self.rx, self.rz, self.bx, kind=kind)
@@ -176,7 +184,7 @@ class FieldMap:
                 try:
                     self.gap = float(words[1]) #[mm]
                 except ValueError:
-                    self.gap = None  
+                    self.gap = None
                 continue
             if cmd == 'gap_controle[mm]:':
                 try:

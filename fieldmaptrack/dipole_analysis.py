@@ -4,6 +4,7 @@ import fieldmaptrack
 import math
 from   fieldmaptrack.common_analysis import *
 import fieldmaptrack.track as track
+import sys
 
 class Config:
 
@@ -40,7 +41,11 @@ def calc_reference_trajectory_good_field_region(config):
         init_rx = config.traj_init_rx
     else:
         init_rx = 0.0
-    init_ry, init_rz = 0.0, 0.0
+    if hasattr(config, 'traj_init_rz'):
+        init_rz = config.traj_init_rz
+    else:
+        config.traj_init_rz = init_rz = 0.0
+    init_ry = 0.0
     init_px, init_py, init_pz = 0.0, 0.0, 1.0
     rk_min_rz = config.fmap.rz[-1]
     while True:
@@ -134,7 +139,7 @@ def trajectory_analysis(config):
 
     # prints basic information on the reference trajectory
     # ====================================================
-    print('--- trajectory (rz > 0) ---')
+    print('--- trajectory (rz > {0} mm) ---'.format(config.traj_init_rz))
     print(config.traj)
     print('{0:<35s} {1} mm'.format('sagitta:', config.traj_sagitta))
 
