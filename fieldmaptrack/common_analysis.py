@@ -459,6 +459,8 @@ def create_AT_model(config, segmentation):
     nr_segments  = len(segmentation)
 
     seg_border     = np.append([0.0], np.cumsum(segmentation))
+
+
     seg_multipoles = np.zeros((nr_monomials, nr_segments))
     model_multipoles_integral = np.zeros((nr_segments, nr_monomials))
     for i in range(nr_segments-1):
@@ -493,6 +495,7 @@ def create_AT_model_orig(config, segmentation):
     # interpolates multipoles on segmentation points
     s_seg = np.cumsum(segmentation)
     p_seg = np.zeros((nr_monomials, len(s_seg)))
+
     for i in range(nr_monomials):
         p_seg[i,:] = np.interp(x=s_seg, xp=s, fp=p[i,:])
     # adds interpolated points to data and sorts
@@ -535,25 +538,27 @@ def model_analysis(config):
     nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
 
     monomials = []
-    strapp = '{0:^8s} {1:^14s} '
+    strapp = '{0:^8s} {1:^23s} '
     for i in range(nr_monomials):
-        strapp += '{'+'{0}'.format(2+i)+':^14s} '
+        strapp += '{'+'{0}'.format(2+i)+':^23s} '
         monomials.append('PolynomB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
 
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection
 
     print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m],[T] for polynom_b ---')
-    print(strapp.format('len[m]', 'angle[rad]', *monomials))
+    print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
-    fstr = '{0:<8.5f} {1:<+14.06e} '
+    fstr = '{0:<8.5f} {1:<+.16e} '
     for i in range(m.shape[0]):
-        fstr += '{'+str(i+2)+':<+14.6e} '
+        fstr += '{'+str(i+2)+':<+.16e} '
     for i in range(len(l)):
         if 0 not in config.multipoles.normal_field_fitting_monomials:
             val = [l[i]] + [0.0] + list(m[:,i] / l[i])
         else:
-            val = [l[i]] + [m[0,i]] + list(m[:,i] / l[i])
+            angle = m[0,i] * 180 / math.pi
+            #val = [l[i]] + [m[0,i]] + list(m[:,i] / l[i])
+            val = [l[i]] + [angle] + list(m[:,i] / l[i])
             if i == len(l)-1:
                 val[2] = error_deflection / l[i]
             else:
