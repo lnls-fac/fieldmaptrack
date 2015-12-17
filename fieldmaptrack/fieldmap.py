@@ -25,6 +25,9 @@ class OutOfRangeRzMin(OutOfRangeRz):
 class IrregularFieldMap(Exception):
     pass
 
+min_rx = 0
+max_rx = 0
+
 class FieldMapSet:
 
     def __init__(self):
@@ -36,7 +39,16 @@ class FieldMapSet:
     def interpolate(self, rx_global, ry_global, rz_global):
         bx, by, bz = 0.0, 0.0, 0.0
         for fm in self.fieldmaps:
-            tbx, tby, tbz = fm.interpolate(rx_global, ry_global, rz_global)
+
+            try:
+                tbx,tby,tbz = fm.interpolate(rx_global,ry_global,rz_global)
+            except (fieldmap.OutOfRangeRx, fieldmap.OutOfRangeRxMin, fieldmap.OutOfRangeRy):
+                raise TrackException('extrapolation at ' + str((rx_global,ry_global,rz_global)))
+            except fieldmap.OutOfRangeRz:
+                tbx,tby,tbz = 0.0,0.0,0.0
+
+            #tbx, tby, tbz = fm.interpolate(rx_global, ry_global, rz_global)
+
             bx += tbx
             by += tby
             bz += tbz
@@ -230,20 +242,33 @@ class FieldMap:
 
     def interpolate(self, rx_global, ry_global, rz_global):
 
+        #global min_rx, max_rx
+
         # converts to local coordinate system
         C, S = math.cos(self.rotation), math.sin(self.rotation)
         rx =  C * (rx_global - self.translation[0]) + S * (rz_global - self.translation[1])
         ry =  ry_global
         rz = -S * (rx_global - self.translation[0]) + C * (rz_global - self.translation[1])
 
+
+        # if rx < min_rx:
+        #     min_rx = rx
+        #     print(min_rx)
+        #
+        # if rx > max_rx:
+        #     max_rx = rx
+        #     print(max_rx)
+
         if rx < self.rx_min:
             #print('temporary in fieldmap.py!')
-            return (0,0,0)
-            #raise OutOfRangeRxMin('rx = {0:f} < rx_min = {1:f} [mm]'.format(rx, self.rx_min))
+            raise OutOfRangeRxMin('rx = {0:f} < rx_min = {1:f} [mm]'.format(rx, self.rx_min))
+            #return (0,0,0)
+
         if rx > self.rx_max:
             #print('temporary in fieldmap.py!')
-            return (0,0,0)
-            #raise OutOfRangeRxMax('rx = {0:f} > rx_max = {1:f} [mm]'.format(rx, self.rx_max))
+            raise OutOfRangeRxMax('rx = {0:f} > rx_max = {1:f} [mm]'.format(rx, self.rx_max))
+            #return (0,0,0)
+
 
         field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
 

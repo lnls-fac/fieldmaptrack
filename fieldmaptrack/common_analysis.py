@@ -311,8 +311,11 @@ def plot_residual_normal_field(config):
     if not main_monomials:
         return config
 
-    r0 = config.multipoles_r0/1000.0
-    x = np.linspace(0,1.0*r0, 60)
+    if hasattr(config, 'max_r_residual_field'):
+        r0 = config.max_r_residual_field/1000
+    else:
+        r0 = config.multipoles_r0/1000.0
+    x = np.linspace(0,r0, 60)
 
     # by field reconstructed from fitted polynomials
     dby, by_nominal = 0*x, 0*x
@@ -332,6 +335,12 @@ def plot_residual_normal_field(config):
         points = sf.get_transverse_line(1000*x)
         field = config.traj.fieldmap.interpolate_set(points)
         by[i,:] = field[1,:]
+        # try:
+        #     field = config.traj.fieldmap.interpolate_set(points)
+        #     by[i,:] = field[1,:]
+        # except:
+        #     print(max(points[0,:]))
+
     intby = 0*x
     for i in range(len(x)):
         intby[i] = np.trapz(y = by[:,i], x = s/1.0e3) # [T.m]
@@ -537,11 +546,13 @@ def model_analysis(config):
     # prints info on model
     nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
 
+    ang_fmt = '+10.5f'
+
     monomials = []
-    strapp = '{0:^8s} {1:^23s} '
+    strapp = '{0:^8s}  {1:^10s}  '
     for i in range(nr_monomials):
-        strapp += '{'+'{0}'.format(2+i)+':^23s} '
-        monomials.append('PolynomB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
+        strapp += '{'+'{0}'.format(2+i)+':^11s}  '
+        monomials.append('PolyB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
 
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection
@@ -549,16 +560,31 @@ def model_analysis(config):
     print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m],[T] for polynom_b ---')
     print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
-    fstr = '{0:<8.5f} {1:<+.16e} '
+    fstr = '{0:^8.3f}, {1:^' + ang_fmt + '}, '
     for i in range(m.shape[0]):
-        fstr += '{'+str(i+2)+':<+.16e} '
+        fstr += '{'+str(i+2)+':^+11.2e}, '
+
+    # builds list with segmented deflection agles truncated as string (satisfying sum rule)
+    angles = []
+    for i in range(len(l)):
+        tmp_fmt = '{0:' + ang_fmt + '}'
+        angles.append(tmp_fmt.format(m[0,i]*180/math.pi))
+    tot_angle = sum(m[0,:] * 180 / math.pi)
+    tot_angle_trunc = sum([float(angle) for angle in angles])
+    maxv = max(m[0,:])
+    idx = list(m[0,:]).index(maxv)
+    nvalue = float(angles[idx])
+    nvalue += tot_angle - tot_angle_trunc
+    angles[idx] = tmp_fmt.format(nvalue)
+
+    # generates print-out
     for i in range(len(l)):
         if 0 not in config.multipoles.normal_field_fitting_monomials:
             val = [l[i]] + [0.0] + list(m[:,i] / l[i])
         else:
             angle = m[0,i] * 180 / math.pi
-            #val = [l[i]] + [m[0,i]] + list(m[:,i] / l[i])
-            val = [l[i]] + [angle] + list(m[:,i] / l[i])
+            #val = [l[i]] + [angle] + list(m[:,i] / l[i])
+            val = [l[i]] + [float(angles[i])] + list(m[:,i] / l[i])
             if i == len(l)-1:
                 val[2] = error_deflection / l[i]
             else:

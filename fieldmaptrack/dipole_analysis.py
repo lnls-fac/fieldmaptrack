@@ -162,7 +162,31 @@ def multipoles_analysis(config):
     config.multipoles.calc_multipoles(is_ref_trajectory_flag = False)
     config.multipoles.calc_multipoles_integrals()
     config.multipoles.calc_multipoles_integrals_relative(config.multipoles.normal_multipoles_integral, main_monomial = 0, r0 = config.multipoles_r0, is_skew = False)
-    #config.multipoles.calc_hardedge_polynomials(config.model_hardedge_length)
+
+    # calcs effective length
+
+    # main_monomial = config.normalization_monomial
+    # monomials = config.multipoles.normal_field_fitting_monomials
+    # idx_n = monomials.index(main_monomial)
+    # idx_z = list(config.traj.s).index(0.0)
+    # main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
+    # config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
+
+    main_monomial = config.normalization_monomial
+    monomials = config.multipoles.normal_field_fitting_monomials
+    idx_n = monomials.index(main_monomial)
+
+    if hasattr(config, 'hardedge_half_region'):
+        sel = config.traj.s < config.hardedge_half_region
+        s = config.traj.s[sel]
+        field = config.multipoles.normal_multipoles[idx_n,sel]
+        integrated_field = np.trapz(field, s)
+        hardedge_field = integrated_field / config.hardedge_half_region
+        config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / hardedge_field
+    else:
+        idx_z = list(config.traj.s).index(0.0)
+        main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
+        config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
 
     # saves multipoles to file
     if not config.interactive_mode: config.multipoles.save('multipoles.txt')

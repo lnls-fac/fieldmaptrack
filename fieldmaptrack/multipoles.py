@@ -152,7 +152,6 @@ class Multipoles:
         normal_field_monomials = self.normal_field_fitting_monomials
         skew_field_monomials = self.skew_field_fitting_monomials
 
-
         all_monomials = sorted(set(list(normal_field_monomials) + list(skew_field_monomials)))
         r = ''
         try:
@@ -164,20 +163,23 @@ class Multipoles:
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_skew', 1e4*self.max_fit_error_skew[0], 1e4*abs(self.max_fit_error_skew[1]))
         r += '\n{0:<35s} {1} mm'.format('r0_for_relative_multipoles', self.r0)
         r += '\n{0:<35s} {1}'.format('main monomial', 'n = {0}, skew:{1}'.format(self.main_monomial, self.main_monomial_is_skew))
-        r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('                   ', 'MaxAbs_Nn', 'Integ_Nn', 'MaxAbs_Sn', 'Integ_Sn', 'Nn/N0(@r0)', 'Sn/S0(@r0)')
+        #r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('                   ', 'MaxAbs_Nn', 'Integ_Nn', 'MaxAbs_Sn', 'Integ_Sn', 'Nn/N0(@r0)', 'Sn/S0(@r0)')
+        r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('                   ', 'Nn(s=0)', 'Integ_Nn', 'Sn(s=0)', 'Integ_Sn', 'Nn/N0(@r0)', 'Sn/S0(@r0)')
         r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('<multipole_order n>', '[T/m^n]', '[T.m/m^n]', '[T/m^n]', '[T.m/m^n]', '[]', '[]')
         for i in range(len(all_monomials)):
             n = all_monomials[i]
             try:
                 idx = normal_field_monomials.index(all_monomials[i])
-                max_poly_b   = '{0:^13.4e}'.format(max(np.abs(self.normal_multipoles[idx,:])))
+                #max_poly_b   = '{0:^13.4e}'.format(max(np.abs(self.normal_multipoles[idx,:])))
+                max_poly_b   = '{0:^13.4e}'.format(np.abs(self.normal_multipoles[idx,0]))
                 integ_poly_b = '{0:^+13.4e}'.format(self.normal_multipoles_integral[idx])
                 integ_poly_b_relative = '{0:^+13.4e}'.format(self.normal_multipoles_integral_relative[idx])
             except ValueError:
                 max_poly_b, integ_poly_b, integ_poly_b_relative = '---','---','---'
             try:
                 idx = skew_field_monomials.index(all_monomials[i])
-                max_poly_a   = '{0:^13.4e}'.format(max(np.abs(self.skew_multipoles[idx,:])))
+                #max_poly_a   = '{0:^13.4e}'.format(max(np.abs(self.skew_multipoles[idx,:])))
+                max_poly_a   = '{0:^13.4e}'.format(np.abs(self.skew_multipoles[idx,0]))
                 integ_poly_a = '{0:^+13.4e}'.format(self.skew_multipoles_integral[idx])
                 integ_poly_a_relative = '{0:^+13.4e}'.format(self.skew_multipoles_integral_relative[idx])
             except ValueError:
