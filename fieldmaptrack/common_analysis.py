@@ -557,7 +557,7 @@ def model_analysis(config):
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection
 
-    print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m],[T] for polynom_b ---')
+    print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and m^(n-1) for polynom_b ---')
     print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
     fstr = '{0:^8.3f}, {1:^' + ang_fmt + '}, '
