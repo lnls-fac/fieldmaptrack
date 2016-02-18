@@ -28,13 +28,33 @@ def help():
     print('       run')
     print('              run the complete analysis')
     print()
-    print('       summary')
-    print('              prints summary of resultas and plots analysis results')
+    print('       rawfield')
+    print('              does rawfield analysis')
     print()
+    print('       trajectory')
+    print('              does trajectory analysis (after rawfield)')
+    print()
+    print('       multipoles')
+    print('              does multipoles analysis (after trajectory)')
+    print()
+    print('       model')
+    print('              does model analysis (after multipoles)')
+    print()
+    print('       summary')
+    print('              prints summary of results and plots analysis results')
+    print()
+    print('       dipole_profile')
+    print('              prints and plots segmented model of dipoles')
+    print()
+
+
+def dipole_profile():
+
+    os.system('fma-dipole_profile.py')
 
 def edit():
 
-    os.system('gedit -s rawfield.in trajectory.in multipoles.in model.in &')
+    os.system('atom -n rawfield.in trajectory.in multipoles.in model.in &')
 
 def clean():
 
@@ -134,3 +154,5 @@ if sys.argv[1] == 'model':
     model()
 if sys.argv[1] == 'summary':
     summary()
+if sys.argv[1] == 'dipole_profile':
+    dipole_profile()

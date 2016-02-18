@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import numpy as np
 from lnls import dialog
@@ -93,6 +91,3 @@ def run():
     pathdir, magnet_label, energy, data, multipoles = get_data(text = 'Select folder containing fieldmap analysis of dipole')
     print_wiki_table(magnet_label, energy, data, multipoles)
 
-
-if __name__ == "__main__":
-    run()
