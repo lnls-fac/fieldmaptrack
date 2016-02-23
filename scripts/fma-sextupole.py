@@ -68,7 +68,7 @@ print()
 print('analysis of "' + folder1 + '" compared to "' + folder2 + '"')
 print()
 print('{0:<35s}: {1} mm'.format('multipoles calculated at r0', 1000*r0))
-print('{0:<35s}: {1}'.format('main monomial', main_monomial))
+print('{0:<35s}: {1}'.format('main_monomial', main_monomial))
 print('{0:<35s}: {1}'.format('is_skew?', main_monomial_is_skew))
 print('{0:<35s}: {1:+.4e} {2}'.format('main integrated multipole', main_multipole, 'T.m**('+str(1-main_monomial)+')'))
 

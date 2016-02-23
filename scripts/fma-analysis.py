@@ -43,14 +43,14 @@ def help():
     print('       summary')
     print('              prints summary of results and plots analysis results')
     print()
-    print('       dipole_profile')
-    print('              prints and plots segmented model of dipoles')
+    print('       profile')
+    print('              prints and plots segmented models')
     print()
 
 
-def dipole_profile():
+def profile():
 
-    os.system('fma-dipole_profile.py')
+    os.system('fma-profile.py')
 
 def edit():
 
@@ -154,5 +154,5 @@ if sys.argv[1] == 'model':
     model()
 if sys.argv[1] == 'summary':
     summary()
-if sys.argv[1] == 'dipole_profile':
-    dipole_profile()
+if sys.argv[1] == 'profile':
+    profile()

@@ -162,7 +162,7 @@ class Multipoles:
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_normal', 1e4*self.max_fit_error_normal[0], 1e4*abs(self.max_fit_error_normal[1]))
         r += '\n{0:<35s} {1:.3f}/{2:.3f} G/G'.format('max_fitting_error_skew', 1e4*self.max_fit_error_skew[0], 1e4*abs(self.max_fit_error_skew[1]))
         r += '\n{0:<35s} {1} mm'.format('r0_for_relative_multipoles', self.r0)
-        r += '\n{0:<35s} {1}'.format('main monomial', 'n = {0}, skew:{1}'.format(self.main_monomial, self.main_monomial_is_skew))
+        r += '\n{0:<35s} {1}'.format('main_monomial', 'n = {0}, skew:{1}'.format(self.main_monomial, self.main_monomial_is_skew))
         #r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('                   ', 'MaxAbs_Nn', 'Integ_Nn', 'MaxAbs_Sn', 'Integ_Sn', 'Nn/N0(@r0)', 'Sn/S0(@r0)')
         r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('                   ', 'Nn(s=0)', 'Integ_Nn', 'Sn(s=0)', 'Integ_Sn', 'Nn/N0(@r0)', 'Sn/S0(@r0)')
         r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('<multipole_order n>', '[T/m^n]', '[T.m/m^n]', '[T/m^n]', '[T.m/m^n]', '[]', '[]')
