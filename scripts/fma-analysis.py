@@ -46,6 +46,10 @@ def help():
     print('       profile')
     print('              prints and plots segmented models')
     print()
+    print('       multifunctional-sextupole')
+    print('              prints data on multifunctional sextupoles')
+    print()
+
 
 
 def profile():
@@ -133,6 +137,8 @@ def multipoles():
 def model():
     os.system('fma-model.py > model.out')
 
+def multifunctional_sextupole():
+    os.system('fma-multifunctional-sextupole.py')
 
 if len(sys.argv) != 2:
     help()
@@ -156,3 +162,5 @@ if sys.argv[1] == 'summary':
     summary()
 if sys.argv[1] == 'profile':
     profile()
+if sys.argv[1] == 'multifunctional-sextupole':
+    multifunctional_sextupole()
