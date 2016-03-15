@@ -65,7 +65,7 @@ def print_difference(fname, data0, data1, order, mtype, r0):
             n0, s0 = data0[h]
         except:
             n0, s0 = 0.0, 0.0
-        print('n={0:02d}: {1:+.3e} {2:+.3e} | {3:+.3e} {4:+.3e} | {5:+.3e} {6:+.3e}'.format(h,n0,s0,n1,s1,n2,s2))
+        print('n={0:02d}: {1:+.4e} {2:+.4e} | {3:+.4e} {4:+.4e} | {5:+.4e} {6:+.4e}'.format(h,n0,s0,n1,s1,n2,s2))
 
 def run():
     fname, data = get_data(text = 'Select folder containing fieldmap analysis of sextupolar-only excitation')
