@@ -177,19 +177,19 @@ class FieldMap:
                 continue
 
             cmd = words[0].lower()
-            if cmd == 'nome_do_mapa:':
+            if cmd == 'fieldmap_name:' or cmd == 'nome_do_mapa:':
                 self.fieldmap_label = ' '.join(words[1:])
                 continue
-            if cmd == 'data_hora:':
+            if cmd == 'timestamp:' or cmd == 'data_hora:':
                 self.timestamp = ' '.join(words[1:])
                 continue
-            if cmd == 'nome_do_arquivo:':
+            if cmd == 'filename:' or cmd == 'nome_do_arquivo:':
                 self.filename = ' '.join(words[1:])
                 continue
-            if cmd == 'numero_de_imas:':
+            if cmd == 'nr_magnets:' or cmd == 'numero_de_imas:':
                 self.nr_magnets = int(words[1])
                 continue
-            if cmd == 'nome_do_ima:':
+            if cmd == 'magnet_name:' or cmd == 'nome_do_ima:':
                 self.magnet_label = ' '.join(words[1:])
                 continue
             if cmd == 'gap[mm]:':
@@ -198,16 +198,16 @@ class FieldMap:
                 except ValueError:
                     self.gap = None
                 continue
-            if cmd == 'gap_controle[mm]:':
+            if cmd == 'control_gap[mm]:' or cmd == 'gap_controle[mm]:':
                 try:
                     self.control_gap = float(words[1]) #[mm]
                 except:
                     self.control_gap = None
                 continue
-            if cmd == 'comprimento[mm]:':
+            if cmd == 'magnet_length[mm]:' or cmd == 'comprimento[mm]:':
                 self.length = float(words[1]) #[mm]
                 continue
-            if cmd == 'corrente[a]:':
+            if cmd == 'current_main[a]:' or cmd == 'corrente[a]:':
                 try:
                     self.current = words[1]#[A]
                 except ValueError:
@@ -218,6 +218,12 @@ class FieldMap:
                     self.ni = float(words[1]) #[]
                 except:
                     self.ni = None
+                continue
+            if cmd == 'current_trim[a]:':
+                try:
+                    self.current_trim = words[1]#[A]
+                except ValueError:
+                    self.current_trim = None
                 continue
             if cmd == 'corrente_aux[a]:':
                 try:

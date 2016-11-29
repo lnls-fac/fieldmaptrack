@@ -105,9 +105,9 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         spos, field = m[:,0], m[:,1]
         plt.plot(spos, field, 'r', linewidth=1.5)
         plt.xlim([0,1.1*s[-1]])
-        plt.xlabel('pos [mm]'), plt.ylabel('field [T]')
+        plt.xlabel('SPos [mm]'), plt.ylabel('Field [T]')
         plt.grid('on')
-        plt.title('half segmented model of ' + magnet_label)
+        plt.title('Half segmented model of ' + magnet_label)
         plt.savefig('segmented_model_' + magnet_label + ".svg")
         plt.show()
     elif magnet_type[0] == 'quadrupole':
@@ -141,9 +141,9 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         spos, field = m[:,0], -m[:,quad_idx+1]/brho
         plt.plot(spos, field, 'r', linewidth=1.5)
         plt.xlim([0,1.1*s[-1]])
-        plt.xlabel('pos [mm]'), plt.ylabel('quadrupole strength [1/m²]')
+        plt.xlabel('SPos [mm]'), plt.ylabel('Quadrupole strength [1/m²]')
         plt.grid('on')
-        plt.title('half segmented model of ' + magnet_label)
+        plt.title('Half segmented model of ' + magnet_label)
         plt.savefig('segmented_model_' + magnet_label + ".svg")
         plt.show()
     elif magnet_type[0] == 'sextupole':
@@ -177,9 +177,9 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         spos, field = m[:,0], -m[:,sext_idx+1]/brho
         plt.plot(spos, field, 'r', linewidth=1.5)
         plt.xlim([0,1.1*s[-1]])
-        plt.xlabel('pos [mm]'), plt.ylabel('sextupole strength [1/m³]')
+        plt.xlabel('SPos [mm]'), plt.ylabel('Sextupole strength [1/m³]')
         plt.grid('on')
-        plt.title('half segmented model of ' + magnet_label)
+        plt.title('Half segmented model of ' + magnet_label)
         plt.savefig('segmented_model_' + magnet_label + ".svg")
         plt.show()
     elif magnet_type[0] == 'corrector':
@@ -226,5 +226,5 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
 
 
 def run():
-    pathdir, magnet_label, magnet_type, harmonics, energy, data, multipoles = get_data(text = 'Select folder containing fieldmap analysis of dipole')
+    pathdir, magnet_label, magnet_type, harmonics, energy, data, multipoles = get_data(text = 'Select folder containing fieldmap analysis of magnet')
     print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipoles)
