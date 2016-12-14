@@ -128,7 +128,9 @@ class FieldMap:
         ''' data section '''
         raw_data = np.fromstring(content[idx+1:], dtype=float, sep=' ')
         data = raw_data.view()
+        print(data.shape)
         data.shape = (-1,6)
+        print(data.shape)
         # position data
         self.rx = np.unique(data[:,0])
         self.ry = np.unique(data[:,1])
@@ -143,7 +145,14 @@ class FieldMap:
         self.rz_step = (self.rz_max - self.rz_min) / (self.rz_nrpts - 1.0) if self.rz_nrpts > 1 else 0.0
         self.rx_zero = np.where(self.rx == 0)[0][0]
         self.ry_zero = np.where(self.ry == 0)[0][0]
-        self.rz_zero = np.where(self.rz == 0)[0][0]
+        try:
+            self.rz_zero = np.where(self.rz == 0)[0][0]
+        except:
+            print('data points do not contain z=0 !')
+            self.rz_zero = 0
+            for i in range(len(self.rz)):
+                if abs(self.rz[i]) < abs(self.rz[self.rz_zero]):
+                    self.rz_zero = i
 
         # field data
         self.bx, self.by, self.bz = data[:,3].view(), data[:,4].view(), data[:,5].view()

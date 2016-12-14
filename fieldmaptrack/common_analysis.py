@@ -348,7 +348,14 @@ def plot_residual_normal_field(config):
 
 
     # by field integration (rawfield)
-    iz = list(config.fmap.rz).index(0.0)
+    try:
+        iz = list(config.fmap.rz).index(0.0)
+    except:
+        print('data points do not contain z=0 !')
+        iz = 0
+        for i in range(len(config.fmap.rz)):
+            if abs(config.fmap.rz[i]) < abs(config.fmap.rz[iz]):
+                iz = i
     ix = list(config.fmap.rx).index(0.0)
     rz  = config.fmap.rz[iz:]/1000.0
     by  = config.fmap.by[0][ix:,iz:]
