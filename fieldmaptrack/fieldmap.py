@@ -128,9 +128,7 @@ class FieldMap:
         ''' data section '''
         raw_data = np.fromstring(content[idx+1:], dtype=float, sep=' ')
         data = raw_data.view()
-        print(data.shape)
         data.shape = (-1,6)
-        print(data.shape)
         # position data
         self.rx = np.unique(data[:,0])
         self.ry = np.unique(data[:,1])
