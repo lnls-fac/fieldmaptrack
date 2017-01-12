@@ -64,7 +64,7 @@ def get_data(text):
     # --- rawfield.in ---
     fname = files[0] + '/rawfield.in'
     if not os.path.exists(fname):
-        print('selected directory does not contain rafield.in')
+        print('selected directory does not contain rawfield.in')
         sys.exit(1)
     mtype = read_rawfield_file(fname)
     # --- analysis.txt ---
