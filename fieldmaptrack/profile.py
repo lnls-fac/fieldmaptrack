@@ -218,7 +218,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         spos, field = m[:,0], -m[:,dip_idx+1]/brho
         plt.plot(spos, field, 'r', linewidth=1.5)
         plt.xlim([0,1.1*s[-1]])
-        plt.xlabel('pos [mm]'), plt.ylabel('dipole strength [1/m]')
+        plt.xlabel('SPos [mm]'), plt.ylabel('Dipole strength [1/m]')
         plt.grid('on')
         plt.title('half segmented model of ' + magnet_label)
         plt.savefig('segmented_model_' + magnet_label + ".svg")
