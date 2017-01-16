@@ -556,7 +556,7 @@ def model_analysis(config):
     ang_fmt = '+10.5f'
 
     monomials = []
-    strapp = '{0:^8s}  {1:^10s}  '
+    strapp = '{0:^9s}  {1:^10s}  '
     for i in range(nr_monomials):
         strapp += '{'+'{0}'.format(2+i)+':^11s}  '
         monomials.append('PolyB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
@@ -567,7 +567,7 @@ def model_analysis(config):
     print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m^(n-1)] for polynom_b ---')
     print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
-    fstr = '{0:^8.3f}, {1:^' + ang_fmt + '}, '
+    fstr = '{0:^8.4f}, {1:^' + ang_fmt + '}, '
     for i in range(m.shape[0]):
         fstr += '{'+str(i+2)+':^+11.2e}, '
 
