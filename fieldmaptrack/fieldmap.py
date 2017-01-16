@@ -199,6 +199,9 @@ class FieldMap:
             if cmd == 'magnet_name:' or cmd == 'nome_do_ima:':
                 self.magnet_label = ' '.join(words[1:])
                 continue
+            if cmd == 'rotation[deg]:':
+                self.rotation = float(words[1]) * (math.pi/180.0)
+                continue
             if cmd == 'gap[mm]:':
                 try:
                     self.gap = float(words[1]) #[mm]
