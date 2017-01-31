@@ -223,6 +223,30 @@ class FieldMap:
                 except ValueError:
                     self.current = None
                 continue
+            if cmd == 'current_qs[a]:':
+                try:
+                    if float(words[1]) != 0:
+                        self.current = words[1]#[A]
+                    self.current_qs = words[1]
+                except ValueError:
+                    pass
+                continue
+            if cmd == 'current_ch[a]:':
+                try:
+                    if float(words[1]) != 0:
+                        self.current = words[1]#[A]
+                    self.current_ch = words[1]
+                except ValueError:
+                    pass
+                continue
+            if cmd == 'current_cv[a]:':
+                try:
+                    if float(words[1]) != 0:
+                        self.current = words[1]#[A]
+                    self.current_cv = words[1]
+                except ValueError:
+                    pass
+                continue
             if cmd == 'ni[a.esp]:':
                 try:
                     self.ni = float(words[1]) #[]
