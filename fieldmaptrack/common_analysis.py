@@ -470,12 +470,14 @@ def plot_residual_skew_field(config):
 def create_AT_model(config, segmentation):
 
     s     = np.copy(config.traj.s)
-    p     = np.copy(config.multipoles.normal_multipoles)
+    if config.normalization_is_skew:
+        p = np.copy(config.multipoles.skew_multipoles)
+    else:
+        p = np.copy(config.multipoles.normal_multipoles)
     nr_monomials = len(p[:,0])
     nr_segments  = len(segmentation)
 
     seg_border     = np.append([0.0], np.cumsum(segmentation))
-
 
     seg_multipoles = np.zeros((nr_monomials, nr_segments))
     model_multipoles_integral = np.zeros((nr_segments, nr_monomials))
@@ -503,36 +505,6 @@ def create_AT_model(config, segmentation):
     config.model_multipoles_integral = model_multipoles_integral
     return config
 
-def create_AT_model_orig(config, segmentation):
-
-    s     = np.copy(config.traj.s)
-    p     = np.copy(config.multipoles.normal_multipoles)
-    nr_monomials = len(p[:,0])
-    # interpolates multipoles on segmentation points
-    s_seg = np.cumsum(segmentation)
-    p_seg = np.zeros((nr_monomials, len(s_seg)))
-
-    for i in range(nr_monomials):
-        p_seg[i,:] = np.interp(x=s_seg, xp=s, fp=p[i,:])
-    # adds interpolated points to data and sorts
-    s = np.append(s, s_seg)
-    p = np.append(p, p_seg, axis = 1)
-    new_order = np.argsort(s)
-    s = s[new_order]
-    p = p[:,new_order]
-
-    config.model_segmentation = segmentation
-    config.model_multipoles_integral = np.zeros((len(s_seg), len(p[:,0])))
-    left_s, right_s = 0, s_seg[0]
-    for i in range(len(s_seg)-1):
-        sel = (s >= left_s) & (s <= right_s)
-        config.model_multipoles_integral[i,:] = np.trapz(x = s[sel]/1000, y = p[:,sel])
-        left_s, right_s = right_s, s_seg[i+1]
-    sel = (s >= s_seg[-1])
-    config.model_multipoles_integral[-1,:] = np.trapz(x = s[sel]/1000, y = p[:,sel])
-
-    return config
-
 def model_analysis(config):
 
     # creates AT model
@@ -541,6 +513,7 @@ def model_analysis(config):
     # adds discrepancy of deflection angle as error in polynomb[0]
     l = np.array(config.model_segmentation) / 1000.0
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
+
     mi = np.sum(m, axis=1)
     if 0 not in config.multipoles.normal_field_fitting_monomials:
         fmap_deflection  = 0.0
@@ -564,7 +537,11 @@ def model_analysis(config):
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection
 
-    print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m^(n-1)] for polynom_b ---')
+    if config.normalization_is_skew:
+        print('--- model polynom_a (rz > 0). units: [m] for length, [rad] for angle and [m^(n-1)] for polynom_a ---')
+    else:
+        print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m^(n-1)] for polynom_b ---')
+
     print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
     fstr = '{0:^8.4f}, {1:^' + ang_fmt + '}, '
@@ -586,7 +563,7 @@ def model_analysis(config):
 
     # generates print-out
     for i in range(len(l)):
-        if 0 not in config.multipoles.normal_field_fitting_monomials:
+        if 0 not in config.multipoles.normal_field_fitting_monomials and 0 not in config.multipoles.skew_field_fitting_monomials:
             val = [l[i]] + [0.0] + list(m[:,i] / l[i])
         else:
             angle = m[0,i] * 180 / math.pi
