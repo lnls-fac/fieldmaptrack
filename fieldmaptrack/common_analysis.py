@@ -197,7 +197,7 @@ def multipoles_analysis(config):
 
 
     # saves multipoles to file
-    if not config.interactive_mode: config.multipoles.save('multipoles.txt')
+    if not config.interactive_mode: config.multipoles.save('multipoles.txt', is_skew=True)
 
     # prints basic information on multipoles
     # ======================================
@@ -524,7 +524,10 @@ def model_analysis(config):
         error_deflection = -(nominal_deflection - fmap_deflection)
 
     # prints info on model
-    nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
+    if config.normalization_is_skew:
+        nr_monomials = len(config.multipoles.skew_field_fitting_monomials)
+    else:
+        nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
 
     ang_fmt = '+10.5f'
 
@@ -532,7 +535,10 @@ def model_analysis(config):
     strapp = '{0:^9s}  {1:^10s}  '
     for i in range(nr_monomials):
         strapp += '{'+'{0}'.format(2+i)+':^11s}  '
-        monomials.append('PolyB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
+        if config.normalization_is_skew:
+            monomials.append('PolyA(n='+'{0:d}'.format(config.multipoles.skew_field_fitting_monomials[i])+')')
+        else:
+            monomials.append('PolyB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
 
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection

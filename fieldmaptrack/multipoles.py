@@ -189,17 +189,25 @@ class Multipoles:
         return r
 
 
-    def save(self, filename):
+    def save(self, filename, is_skew=False):
 
         with open(filename, 'w') as fp:
             fp.write('# multipoles\n')
             fp.write('# s[mm] ')
-            for j in range(len(self.normal_field_fitting_monomials)):
-                fp.write('polynom_b[n={0}][T/m^n] '.format(self.normal_field_fitting_monomials[j]))
+            if is_skew:
+                for j in range(len(self.skew_field_fitting_monomials)):
+                    fp.write('polynom_a[n={0}][T/m^n] '.format(self.skew_field_fitting_monomials[j]))
+            else:
+                for j in range(len(self.normal_field_fitting_monomials)):
+                    fp.write('polynom_b[n={0}][T/m^n] '.format(self.normal_field_fitting_monomials[j]))
             fp.write('\n')
             traj = self.trajectory
             for i in range(len(traj.s)):
                 fp.write('{0:+.16e} '.format(traj.s[i]))
-                for j in range(len(self.normal_field_fitting_monomials)):
-                    fp.write('{0:+.16e} '.format(self.normal_multipoles[j, i]))
+                if is_skew:
+                    for j in range(len(self.skew_field_fitting_monomials)):
+                        fp.write('{0:+.16e} '.format(self.skew_multipoles[j, i]))
+                else:
+                    for j in range(len(self.normal_field_fitting_monomials)):
+                        fp.write('{0:+.16e} '.format(self.normal_multipoles[j, i]))
                 fp.write('\n')

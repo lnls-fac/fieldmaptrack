@@ -35,7 +35,11 @@ def read_analysis_file(fname):
         if line.startswith('beam_energy:'):
             energy = 1e9*float((line.split(':')[1]).strip().split(' ')[0])
         if 'len[m]' in line:
-            harmonics = [int(word) for word in line.strip().replace('PolyB(n=','').replace(')','').split()[2:]]
+            try:
+                harmonics = [int(word) for word in line.strip().replace('PolyB(n=','').replace(')','').split()[2:]]
+            except ValueError:
+                harmonics = [int(word) for word in line.strip().replace('PolyA(n=','').replace(')','').split()[2:]]
+
             store_line = True
             continue
         if store_line:
@@ -78,7 +82,7 @@ def get_data(text):
 
 def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipoles):
 
-    if magnet_type[1] is not 'normal': raise Exception('skew field not yet implemented')
+    #if magnet_type[1] is not 'normal': raise Exception('skew field not yet implemented')
 
     m = np.array(multipoles)
 
@@ -207,12 +211,14 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         lens = lens * 1000
         field = dip
         s,f = [0], [0]
+
         for i in range(len(lens)):
             s0 = s[-1]
             s.append(s0), f.append(field[i])
             s.append(s0+lens[i]), f.append(field[i])
             s.append(s0+lens[i]), f.append(0)
         plt.fill(s,f, 'lightblue')
+        print(s,f)
         plt.fill([0, s[-1]], [0, 0], 'lightblue')
         # --- runge-kutta profile ---
         spos, field = m[:,0], -m[:,dip_idx+1]/brho
