@@ -186,6 +186,7 @@ def multipoles_analysis(config):
         idx_z = list(config.traj.s).index(0.0)
         main_multipole_center = config.multipoles.skew_multipoles[idx_n,idx_z]
         config.multipoles.effective_length = config.multipoles.skew_multipoles_integral[idx_n] / main_multipole_center
+        if not config.interactive_mode: config.multipoles.save('multipoles.txt', is_skew=True) # saves multipoles to file
     else:
         config.multipoles.calc_multipoles_integrals_relative(config.multipoles.normal_multipoles_integral, main_monomial = main_monomial, r0 = config.multipoles_r0, is_skew = False)
         monomials = config.multipoles.normal_field_fitting_monomials
@@ -193,11 +194,8 @@ def multipoles_analysis(config):
         idx_z = list(config.traj.s).index(0.0)
         main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
         config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
+        if not config.interactive_mode: config.multipoles.save('multipoles.txt', is_skew=False) # saves multipoles to file
 
-
-
-    # saves multipoles to file
-    if not config.interactive_mode: config.multipoles.save('multipoles.txt', is_skew=True)
 
     # prints basic information on multipoles
     # ======================================
