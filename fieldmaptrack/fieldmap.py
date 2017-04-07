@@ -247,11 +247,17 @@ class FieldMap:
                 except ValueError:
                     pass
                 continue
-            if cmd == 'ni[a.esp]:':
+            if cmd == 'ni_main[a.esp]:':
                 try:
                     self.ni = float(words[1]) #[]
                 except:
                     self.ni = None
+                continue
+            if cmd == 'ni_trim[a.esp]:':
+                try:
+                    self.ni_trim = float(words[1]) #[]
+                except:
+                    self.ni_trim = None
                 continue
             if cmd == 'current_trim[a]:':
                 try:
@@ -267,11 +273,10 @@ class FieldMap:
                 continue
             if cmd == 'ni_aux[a.esp]:':
                 try:
-                    self.ni_aux = float(words[1]) #[]
+                    self.ni_trim = float(words[1]) #[]
                 except:
-                    self.ni_aux = None
+                    self.ni_trim = None
                 continue
-
 
     def interpolate_set(self, points):
 
@@ -331,11 +336,11 @@ class FieldMap:
         except:
             pass
         try:
-            r += '\n{0:<35s} {1} A'.format('aux_coil_current:', self.current_aux)
+            r += '\n{0:<35s} {1} A'.format('trim_coil_current:', self.current_trim)
         except:
             pass
         try:
-            r += '\n{0:<35s} {1} A'.format('aux_coil_NI:', self.ni_aux)
+            r += '\n{0:<35s} {1} A'.format('trim_coil_NI:', self.ni_trim)
         except:
             pass
         try:
