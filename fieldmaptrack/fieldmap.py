@@ -184,6 +184,9 @@ class FieldMap:
                 continue
 
             cmd = words[0].lower()
+            if cmd == 'high_field_gap[mm]:':
+                self.current = None
+                continue
             if cmd == 'fieldmap_name:' or cmd == 'nome_do_mapa:':
                 self.fieldmap_label = ' '.join(words[1:])
                 continue
