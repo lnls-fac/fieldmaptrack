@@ -105,6 +105,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
             s.append(s0+lens[i]), f.append(0)
         plt.fill(s,f, 'lightblue')
         plt.fill([0, s[-1]], [0, 0], 'lightblue')
+        plt.plot(s,f, 'k'); plt.plot([0, s[-1]], [0, 0], 'k')
         # --- runge-kutta profile ---
         spos, field = m[:,0], m[:,1]
         plt.plot(spos, field, 'r', linewidth=1.5)
@@ -141,6 +142,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
             s.append(s0+lens[i]), f.append(0)
         plt.fill(s,f, 'lightblue')
         plt.fill([0, s[-1]], [0, 0], 'lightblue')
+        plt.plot(s,f, 'k'); plt.plot([0, s[-1]], [0, 0], 'k')
         # --- runge-kutta profile ---
         spos, field = m[:,0], -m[:,quad_idx+1]/brho
         plt.plot(spos, field, 'r', linewidth=1.5)
@@ -177,6 +179,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
             s.append(s0+lens[i]), f.append(0)
         plt.fill(s,f, 'lightblue')
         plt.fill([0, s[-1]], [0, 0], 'lightblue')
+        plt.plot(s,f, 'k'); plt.plot([0, s[-1]], [0, 0], 'k')
         # --- runge-kutta profile ---
         spos, field = m[:,0], -m[:,sext_idx+1]/brho
         plt.plot(spos, field, 'r', linewidth=1.5)
@@ -220,6 +223,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         plt.fill(s,f, 'lightblue')
         print(s,f)
         plt.fill([0, s[-1]], [0, 0], 'lightblue')
+        plt.plot(s,f, 'k'); plt.plot([0, s[-1]], [0, 0], 'k')
         # --- runge-kutta profile ---
         spos, field = m[:,0], -m[:,dip_idx+1]/brho
         plt.plot(spos, field, 'r', linewidth=1.5)
