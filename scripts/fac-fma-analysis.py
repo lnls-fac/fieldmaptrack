@@ -7,10 +7,10 @@ import sys
 def help():
 
     print('NAME')
-    print('       fma-analys.py - drive routine used to perform analysis of field maps from 3D magnet models.')
+    print('       fac-fma-analys.py - drive routine used to perform analysis of field maps from 3D magnet models.')
     print()
     print('SYNOPSIS')
-    print('       fma-analysis.py [COMMAND]')
+    print('       fac-fma-analysis.py [COMMAND]')
     print()
     print('DESCRIPTION')
     print('       Accepts commands (single argument) that specify what type of action to do.')
@@ -54,7 +54,7 @@ def help():
 
 def profile():
 
-    os.system('fma-profile.py')
+    os.system('fac-fma-profile.py')
 
 def edit():
 
@@ -66,11 +66,11 @@ def clean():
 
 def run():
 
-    print('1/6 - cleaning directory...'), os.system('fma-analysis.py clean')
-    print('2/6 - rawfield analysis...'), os.system('fma-rawfield.py > rawfield.out')
-    print('3/6 - trajectory calculation...'), os.system('fma-trajectory.py > trajectory.out')
-    print('4/6 - multipoles calculation...'), os.system('fma-multipoles.py > multipoles.out')
-    print('5/6 - model creation...'), os.system('fma-model.py > model.out')
+    print('1/6 - cleaning directory...'), os.system('fac-fma-analysis.py clean')
+    print('2/6 - rawfield analysis...'), os.system('fac-fma-rawfield.py > rawfield.out')
+    print('3/6 - trajectory calculation...'), os.system('fac-fma-trajectory.py > trajectory.out')
+    print('4/6 - multipoles calculation...'), os.system('fac-fma-multipoles.py > multipoles.out')
+    print('5/6 - model creation...'), os.system('fac-fma-model.py > model.out')
     print('6/6 - analysis summary and visualization...'), summary()
 
 def summary():
@@ -126,19 +126,19 @@ def summary():
 
 
 def rawfield():
-    os.system('fma-rawfield.py > rawfield.out')
+    os.system('fac-fma-rawfield.py > rawfield.out')
 
 def trajectory():
-    os.system('fma-trajectory.py > trajectory.out')
+    os.system('fac-fma-trajectory.py > trajectory.out')
 
 def multipoles():
-    os.system('fma-multipoles.py > multipoles.out')
+    os.system('fac-fma-multipoles.py > multipoles.out')
 
 def model():
-    os.system('fma-model.py > model.out')
+    os.system('fac-fma-model.py > model.out')
 
 def multifunctional_sextupole():
-    os.system('fma-multifunctional-sextupole.py')
+    os.system('fac-fma-multifunctional-sextupole.py')
 
 if len(sys.argv) != 2:
     help()
