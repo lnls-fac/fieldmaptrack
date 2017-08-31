@@ -27,7 +27,8 @@ setup(
         'scripts/fac-fma-multipoles.py',
         'scripts/fac-fma-rawfield.py',
         'scripts/fac-fma-sextupole.py',
-        'scripts/fac-fma-trajectory.py'
+        'scripts/fac-fma-trajectory.py',
+	'scripts/fac-fma-profile.py',
     ],
     zip_safe=False,
 )
