@@ -50,22 +50,26 @@ def print_difference(fname, data0, data1, order, mtype, r0):
     r0 = r0/1000.0
     mmult = data1[order][t]*(r0**order)
     m = {}
+    dm = {}
     for h in data1.keys():
+        dm[h] = (data1[h][0] - data0[h][0], data1[h][1] - data0[h][1]) 
         m[h] = ((data1[h][0] - data0[h][0])*(r0**h)/mmult, (data1[h][1] - data0[h][1])*(r0**h)/mmult)
 
+
     print(fname + ':')
-    header = 'harm: normal0    skew0      | normal1    skew1      | rel_normal_dif_r0 rel_skew_dif_r0'
+    header = 'harm: normal0     skew0       | normal1     skew1       | dnormal     dskew       | rel_normal_dif_r0 rel_skew_dif_r0'
     print('-'*(1+len(fname)))
     print(header)
     print('-'*len(header))
     for h in data1.keys():
         n1, s1 = data1[h]
         n2, s2 = m[h]
+        n3, s3 = dm[h]
         try:
             n0, s0 = data0[h]
         except:
             n0, s0 = 0.0, 0.0
-        print('n={0:02d}: {1:+.4e} {2:+.4e} | {3:+.4e} {4:+.4e} | {5:+.4e} {6:+.4e}'.format(h,n0,s0,n1,s1,n2,s2))
+        print('n={0:02d}: {1:+.4e} {2:+.4e} | {3:+.4e} {4:+.4e} | {5:+.4e} {6:+.4e} | {7:+.4e} {8:+.4e}'.format(h,n0,s0,n1,s1,n3,s3,n2,s2))
 
 def run():
     fname, data = get_data(text = 'Select folder containing fieldmap analysis of sextupolar-only excitation')
@@ -73,7 +77,7 @@ def run():
     fname, data = get_data(text = 'Select folder containing fieldmap analysis of an additional excitation')
     data_m, r0_1 = data
     if r0_0 != r0_1: raise Exception('differete values for r0!')
-    ok, order = dialog.input_dialog('please define main multipole order (0:dipoe|1:quadrupole|...)',def_answer='0',name='main multipole order')
+    ok, order = dialog.input_dialog('please define main multipole order (0:dipole|1:quadrupole|...)',def_answer='0',name='main multipole order')
     if not ok: return
     ok, mtype = dialog.input_dialog('please define type of main multipole (normal|skew)',def_answer='normal',name='main multipole type')
     if not ok: return
