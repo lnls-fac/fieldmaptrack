@@ -228,24 +228,24 @@ class FieldMap:
                 continue
             if cmd == 'current_qs[a]:':
                 try:
-                    if float(words[1]) != 0:
-                        self.current = words[1]#[A]
+                    # if float(words[1]) != 0:
+                    #     self.current = words[1]#[A]
                     self.current_qs = words[1]
                 except ValueError:
                     pass
                 continue
             if cmd == 'current_ch[a]:':
                 try:
-                    if float(words[1]) != 0:
-                        self.current = words[1]#[A]
+                    # if float(words[1]) != 0:
+                    #     self.current = words[1]#[A]
                     self.current_ch = words[1]
                 except ValueError:
                     pass
                 continue
             if cmd == 'current_cv[a]:':
                 try:
-                    if float(words[1]) != 0:
-                        self.current = words[1]#[A]
+                    # if float(words[1]) != 0:
+                    #     self.current = words[1]#[A]
                     self.current_cv = words[1]
                 except ValueError:
                     pass
@@ -344,6 +344,30 @@ class FieldMap:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('trim_coil_NI:', self.ni_trim)
+        except:
+            pass
+        try:
+            r += '\n{0:<35s} {1} A'.format('qs_coil_current:', self.current_qs)
+        except:
+            pass
+        try:
+            r += '\n{0:<35s} {1} A'.format('qs_coil_NI:', self.ni_qs)
+        except:
+            pass
+        try:
+            r += '\n{0:<35s} {1} A'.format('ch_coil_current:', self.current_ch)
+        except:
+            pass
+        try:
+            r += '\n{0:<35s} {1} A'.format('ch_coil_NI:', self.ni_ch)
+        except:
+            pass
+        try:
+            r += '\n{0:<35s} {1} A'.format('cv_coil_current:', self.current_cv)
+        except:
+            pass
+        try:
+            r += '\n{0:<35s} {1} A'.format('cv_coil_NI:', self.ni_cv)
         except:
             pass
         try:
