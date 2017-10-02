@@ -58,7 +58,7 @@ def print_difference(fname, data0, data1, order, mtype, r0):
 
     print(fname + ':')
     header = 'harm: normal0     skew0       | normal1     skew1       | dnormal     dskew       | rel_normal_dif_r0 rel_skew_dif_r0'
-    print('-'*(1+len(fname)))
+    print('-'*len(header))
     print(header)
     print('-'*len(header))
     for h in data1.keys():
