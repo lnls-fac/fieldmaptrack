@@ -467,7 +467,7 @@ def plot_residual_skew_field(config):
 
 def create_AT_model(config, segmentation):
 
-    s     = np.copy(config.traj.s)
+    s     = np.abs(np.copy(config.traj.s))
     if config.normalization_is_skew:
         p = np.copy(config.multipoles.skew_multipoles)
     else:
@@ -541,10 +541,13 @@ def model_analysis(config):
     if fmap_deflection != 0.0:
         m[0,:] *= nominal_deflection / fmap_deflection
 
-    if config.normalization_is_skew:
-        print('--- model polynom_a (rz > 0). units: [m] for length, [rad] for angle and [m^(n-1)] for polynom_a ---')
-    else:
-        print('--- model polynom_b (rz > 0). units: [m] for length, [rad] for angle and [m^(n-1)] for polynom_b ---')
+    pol_tp = 'polynom_a ' if config.normalization_is_skew else 'polynom_b '
+    msg = '--- model ' + pol_tp
+    msg += '(rz '
+    msg += '> 0). ' if config.traj.s[-1] > config.traj.s[0] else '< 0). '
+    msg += 'units: [m] for length, [rad] for angle and [m^(n-1)] for '
+    msg += pol_tp + '---'
+    print(msg)
 
     print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
