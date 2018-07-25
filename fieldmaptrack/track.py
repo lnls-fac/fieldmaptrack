@@ -221,7 +221,7 @@ class Trajectory:
             # tests if end of integration is reached
             if min_rz is not None:
                 # integration is being done until <min_rz is reached>
-                if rz > min_rz:
+                if abs(rz) > abs(min_rz):
                     break
             else:
                 # integration is being done until <s_nrpts is reached>
@@ -302,11 +302,11 @@ class Trajectory:
         rx = self.rx
         rz = self.rz
 
-        if rz[-1] < half_dipole_length:
+        if abs(rz[-1]) < half_dipole_length:
             raise TrackException('trajectory path does not exit dipole')
 
         i = 0
-        while (rz[i] < half_dipole_length):
+        while (abs(rz[i]) < half_dipole_length):
             i += 1
         sagitta = rx[0] - rx[i]
         return sagitta

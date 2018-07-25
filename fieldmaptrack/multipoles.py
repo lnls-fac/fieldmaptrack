@@ -113,15 +113,17 @@ class Multipoles:
         normal_field_monomials = self.normal_field_fitting_monomials
         self.normal_multipoles_integral = np.zeros(self.normal_multipoles.shape[0])
         x = self.trajectory.s * mathphys.units.mm_2_meter
+        # if RK integration was done ds < 0, we need to invert integration sign
+        sign = +1.0 if self.trajectory.s[-1] > self.trajectory.s[0] else -1.0
         for i in range(len(normal_field_monomials)):
             yb = self.normal_multipoles[i,:]
-            self.normal_multipoles_integral[i] = np.trapz(y = yb, x = x)
+            self.normal_multipoles_integral[i] = sign * np.trapz(y = yb, x = x)
         skew_field_monomials = self.skew_field_fitting_monomials
         self.skew_multipoles_integral = np.zeros(self.skew_multipoles.shape[0])
         x = self.trajectory.s * mathphys.units.mm_2_meter
         for i in range(len(skew_field_monomials)):
             ya = self.skew_multipoles[i,:]
-            self.skew_multipoles_integral[i] = np.trapz(y = ya, x = x)
+            self.skew_multipoles_integral[i] = sign * np.trapz(y = ya, x = x)
 
     def calc_multipoles_integrals_relative(self, main_polynom, main_monomial, r0, is_skew = False):
 

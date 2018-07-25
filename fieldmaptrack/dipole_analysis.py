@@ -47,7 +47,11 @@ def calc_reference_trajectory_good_field_region(config):
         config.traj_init_rz = init_rz = 0.0
     init_ry = 0.0
     init_px, init_py, init_pz = 0.0, 0.0, 1.0
-    rk_min_rz = config.fmap.rz[-1]
+    if config.traj_rk_s_step > 0.0:
+        rk_min_rz = max(config.fmap.rz)
+    else:
+        rk_min_rz = abs(min(config.fmap.rz))
+    # rk_min_rz = config.fmap.rz[-1]
     while True:
         config.traj.calc_trajectory(init_rx=init_rx, init_ry=init_ry, init_rz=init_rz,
                                     init_px=init_px, init_py=init_py, init_pz=init_pz,
