@@ -119,10 +119,10 @@ def summary():
 
 
     ''' shows summary figure '''
-    try:
-        os.system('okular analysis.pdf 2> /dev/null')
-    except:
-        pass
+    # try:
+    #     os.system('okular analysis.pdf 2> /dev/null')
+    # except:
+    #     pass
 
 
 def rawfield():
