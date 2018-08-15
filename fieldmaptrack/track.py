@@ -249,7 +249,7 @@ class Trajectory:
         ref_point = self.calc_reference_point()
 
         r  = ''
-        r +=   '{0:<35s} {1:.3f} GeV'.format('beam_energy:', self.beam.energy)
+        r +=   '{0:<35s} {1:.6e} GeV'.format('beam_energy:', self.beam.energy)
         r += '\n{0:<35s} {1:+.4e} deg.'.format('horizontal_deflection_angle:', theta_x * (180.0/math.pi))
         r += '\n{0:<35s} {1:+.4e} deg.'.format('vertical_deflection_angle:', theta_y * (180.0/math.pi))
         r += '\n{0:<35s} {1} mm'.format('trajectory_length:', self.s[-1]-self.s[0])
