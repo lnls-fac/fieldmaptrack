@@ -82,16 +82,18 @@ class Trajectory:
         rx, ry, rz, px, py, pz = p
         # calcs magnetic field on current position
         try:
-            bx,by,bz = self.fieldmap.interpolate(rx,ry,rz)
-        except (fieldmap.OutOfRangeRx, fieldmap.OutOfRangeRxMin, fieldmap.OutOfRangeRy):
-            raise TrackException('extrapolation at ' + str((rx,ry,rz)))
+            bx, by, bz = self.fieldmap.interpolate(rx, ry, rz)
+        except (fieldmap.OutOfRangeRx,
+                fieldmap.OutOfRangeRxMin,
+                fieldmap.OutOfRangeRy):
+            raise TrackException('extrapolation at ' + str((rx, ry, rz)))
         except fieldmap.OutOfRangeRz:
-            bx,by,bz = 0.0,0.0,0.0
+            bx, by, bz = 0.0, 0.0, 0.0
 
         # calcs derivatives of the eqs. of motion
         derivs = np.zeros(p.shape)
         derivs[0] = px                              # drx/ds
-        derivs[1] = py                              # dry/dz
+        derivs[1] = py                              # dry/ds
         derivs[2] = pz                              # drz/ds
         derivs[3] = - alpha * (py * bz - pz * by)   # dpx/ds
         derivs[4] = - alpha * (pz * bx - px * bz)   # dpy/ds
