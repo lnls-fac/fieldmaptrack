@@ -153,7 +153,6 @@ def trajectory_analysis(config):
         config.beam = fieldmaptrack.Beam(energy = config.beam_energy)
         config = calc_reference_trajectory(config)
 
-
     # prints basic information on the reference trajectory
     # ====================================================
     print('--- trajectory (rz > 0) ---')

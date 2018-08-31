@@ -76,7 +76,7 @@ def calc_reference_trajectory_good_field_region(config):
 def calc_reference_trajectory(config):
 
     nominal_deflection = -abs(config.model_nominal_angle/2.0)
-    deflection = 0.0;
+    deflection = 0.0
 
     # search an upper energy for which deflection is lower than nominal
     energy1 = 1.005 * config.beam_energy
@@ -131,6 +131,7 @@ def trajectory_analysis(config):
         config.traj = fieldmaptrack.Trajectory(beam=config.beam, fieldmap=config.fmap)
         config.traj.load(config.traj_load_filename)
         config.traj_sagitta = config.traj.calc_sagitta(half_dipole_length)
+        config.traj_init_rz = config.traj.rz
     else:
         if config.traj_is_reference_traj:
             # rescale field so that nominal deflection is reached
