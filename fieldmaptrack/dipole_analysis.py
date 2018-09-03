@@ -131,7 +131,7 @@ def trajectory_analysis(config):
         config.traj = fieldmaptrack.Trajectory(beam=config.beam, fieldmap=config.fmap)
         config.traj.load(config.traj_load_filename)
         config.traj_sagitta = config.traj.calc_sagitta(half_dipole_length)
-        config.traj_init_rz = config.traj.rz
+        config.traj_init_rz = config.traj.rz[0]
     else:
         if config.traj_is_reference_traj:
             # rescale field so that nominal deflection is reached

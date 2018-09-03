@@ -5,24 +5,29 @@ import math
 from fieldmaptrack.track import Trajectory
 import fieldmaptrack.common_analysis
 
+
 class Config:
-    def __init__(self, fname = None):
-        """loads parameters from a file"""
+    """."""
+
+    def __init__(self, fname=None):
+        """Load parameters from a file."""
         if fname is not None:
             with open(fname, 'r') as fp:
                 content = fp.read()
             lines = content.split('\n')
             for line in lines:
                 line = line.strip()
-                if len(line) == 0: continue
+                if len(line) == 0:
+                    continue
                 if line[0] is not '#':
                     attribute, _, value = line.partition(' ')
                     value = value.strip()
                     strcode = 'self.{0} = {1}'.format(attribute, value)
                     exec(strcode)
 
+
 def get_analysis_symbol(magnet_type):
-    """returns analysis module according to magnet type"""
+    """Return analysis module according to magnet type."""
     if magnet_type == 'dipole':
         import fieldmaptrack.dipole_analysis as dipole_analysis
         return dipole_analysis
@@ -36,14 +41,17 @@ def get_analysis_symbol(magnet_type):
         import fieldmaptrack.corrector_analysis as corrector_analysis
         return corrector_analysis
 
-def raw_fieldmap_analysis(config):
-    """does raw fieldmap analysis"""
 
-    if not hasattr(config, 'interactive_mode'): config.interactive_mode = False
+def raw_fieldmap_analysis(config):
+    """Do raw fieldmap analysis."""
+
+    if not hasattr(config, 'interactive_mode'):
+        config.interactive_mode = False
 
     # loads fieldmap from file
     if hasattr(config, 'fmap_rescale_factor'):
-        config.fmap = fieldmaptrack.FieldMap(config.fmap_filename, rescale_factor = config.fmap_rescale_factor)
+        config.fmap = fieldmaptrack.FieldMap(
+            config.fmap_filename, rescale_factor=config.fmap_rescale_factor)
     else:
         config.fmap = fieldmaptrack.FieldMap(config.fmap_filename)
 
@@ -53,12 +61,16 @@ def raw_fieldmap_analysis(config):
             config.config_fig_number += 1
         except:
             config.config_fig_number = 1
-        x,y = config.fmap.rz, config.fmap.by[config.fmap.ry_zero][config.fmap.rx_zero,:]
-        plt.plot(x,y)
+        x, y = config.fmap.rz,\
+            config.fmap.by[config.fmap.ry_zero][config.fmap.rx_zero, :]
+        plt.plot(x, y)
         plt.grid(True)
         plt.xlabel('rz [mm]'), plt.ylabel('by [T]')
-        plt.title(config.config_label + '\n' + 'Longitudinal profile of vertical field')
-        plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + 'by-vs-rz.pdf')
+        plt.title(config.config_label + '\n' +
+                  'Longitudinal profile of vertical field')
+        plt.savefig(config.config_label +
+                    '_fig{0:02d}_'.format(config.config_fig_number) +
+                    'by-vs-rz.pdf')
         plt.clf()
 
         # plots basic data, bx longitudinal profile at (x,y) = (0,0)
@@ -111,6 +123,7 @@ def raw_fieldmap_analysis(config):
 
     return config
 
+
 def calc_reference_trajectory(config):
 
     config.traj = Trajectory(beam=config.beam, fieldmap=config.fmap)
@@ -141,6 +154,7 @@ def calc_reference_trajectory(config):
 
     return config
 
+
 def trajectory_analysis(config):
 
     if config.traj_load_filename is not None:
@@ -165,6 +179,7 @@ def trajectory_analysis(config):
     if not config.interactive_mode: config.traj.save_field(filename='field_on_trajectory.txt')
 
     return config
+
 
 def multipoles_analysis(config):
 
@@ -212,6 +227,7 @@ def multipoles_analysis(config):
         config = plot_residual_skew_field(config)
 
     return config
+
 
 def plot_residual_field_in_curvilinear_system(config):
 
@@ -264,6 +280,7 @@ def plot_residual_field_in_curvilinear_system(config):
 
     return config
 
+
 def plot_normal_multipoles(config):
 
     for i in range(len(config.multipoles_normal_field_fitting_monomials)):
@@ -283,6 +300,7 @@ def plot_normal_multipoles(config):
         plt.clf()
     return config
 
+
 def plot_skew_multipoles(config):
 
     for i in range(len(config.multipoles_skew_field_fitting_monomials)):
@@ -301,6 +319,7 @@ def plot_skew_multipoles(config):
         plt.savefig(config.config_label + '_fig{0:02d}_'.format(config.config_fig_number) + fname + '.pdf')
         plt.clf()
     return config
+
 
 def plot_residual_normal_field(config):
 
@@ -391,6 +410,7 @@ def plot_residual_normal_field(config):
 
     return config
 
+
 def plot_residual_skew_field(config):
 
     main_monomials = config.skew_multipoles_main_monomials
@@ -464,45 +484,63 @@ def plot_residual_skew_field(config):
 
     return config
 
-def create_AT_model(config, segmentation):
 
-    s     = np.abs(np.copy(config.traj.s))
+def create_AT_model(config, segmentation):
+    """."""
+    s = np.abs(np.copy(config.traj.s))
+    angle = np.arcsin(config.traj.px)
     if config.normalization_is_skew:
         p = np.copy(config.multipoles.skew_multipoles)
     else:
         p = np.copy(config.multipoles.normal_multipoles)
-    nr_monomials = len(p[:,0])
-    nr_segments  = len(segmentation)
+    nr_monomials = len(p[:, 0])
+    nr_segments = len(segmentation)
 
-    seg_border     = np.append([0.0], np.cumsum(segmentation))
+    seg_border = np.append([0.0], np.cumsum(segmentation))
 
-    seg_multipoles = np.zeros((nr_monomials, nr_segments))
+    # seg_multipoles = np.zeros((nr_monomials, nr_segments))
     model_multipoles_integral = np.zeros((nr_segments, nr_monomials))
+    model_traj_angle = np.zeros(nr_segments)
     for i in range(nr_segments-1):
         s1, s2 = seg_border[i], seg_border[i+1]
         # interpolates multipolos on borders of segment
         m1, m2 = np.zeros((nr_monomials, 1)), np.zeros((nr_monomials, 1))
         for j in range(nr_monomials):
-            m1[j,:], m2[j,:] = np.interp(x = s1, xp=s, fp=p[j,:]), np.interp(x = s2, xp=s, fp=p[j,:])
+            m1[j, :], m2[j, :] = np.interp(x=s1, xp=s, fp=p[j, :]), \
+                                 np.interp(x=s2, xp=s, fp=p[j, :])
         # calcs integral of multipoles within segment
         sel = (s >= s1) & (s <= s2)
         seg_s = np.append(np.append([s1], s[sel]), [s2])
-        seg_m = np.append(np.append(m1, p[:,sel], axis=1), m2, axis=1)
-        model_multipoles_integral[i,:] = np.trapz(x = seg_s/1000, y = seg_m)
+        seg_m = np.append(np.append(m1, p[:, sel], axis=1), m2, axis=1)
+        model_multipoles_integral[i, :] = np.trapz(x=seg_s/1000, y=seg_m)
+        model_traj_angle[i] = -np.interp(x=s2, xp=s, fp=angle)
     # last segment accumulates the remainder of the integrated multipoles
-    s2  = seg_border[-2]
+    s2 = seg_border[-2]
     m2 = np.zeros((nr_monomials, 1))
     for j in range(nr_monomials):
-        m2[j,:] = np.interp(x = s2, xp=s, fp=p[j,:])
+        m2[j, :] = np.interp(x=s2, xp=s, fp=p[j, :])
     sel = (s >= s2)
     seg_s = np.append([s2], s[sel])
-    seg_m = np.append(m2, p[:,sel], axis=1)
-    model_multipoles_integral[-1,:] = np.trapz(x = seg_s/1000, y = seg_m)
+    seg_m = np.append(m2, p[:, sel], axis=1)
+    model_multipoles_integral[-1, :] = np.trapz(x=seg_s/1000, y=seg_m)
+    model_traj_angle[-1] = -angle[-1]
 
     config.model_multipoles_integral = model_multipoles_integral
+    config.model_traj_angle = model_traj_angle
+    config.model_traj_angle[1:] = np.diff(model_traj_angle)
     return config
 
+
 def model_analysis(config):
+    """."""
+    if config.traj_load_filename is not None:
+        return model_analysis_reftraj(config)
+    else:
+        return model_analysis_standard(config)
+
+
+def model_analysis_standard(config):
+    """."""
 
     # creates AT model
     config = create_AT_model(config, config.model_segmentation)
@@ -513,10 +551,10 @@ def model_analysis(config):
 
     mi = np.sum(m, axis=1)
     if 0 not in config.multipoles.normal_field_fitting_monomials:
-        fmap_deflection  = 0.0
+        fmap_deflection = 0.0
         error_deflection = 0.0
     else:
-        fmap_deflection    = mi[0]
+        fmap_deflection = mi[0]
         nominal_deflection = abs(config.model_nominal_angle/2)*(math.pi/180.0)
         error_deflection = -(nominal_deflection - fmap_deflection)
 
@@ -533,12 +571,14 @@ def model_analysis(config):
     for i in range(nr_monomials):
         strapp += '{'+'{0}'.format(2+i)+':^11s}  '
         if config.normalization_is_skew:
-            monomials.append('PolyA(n='+'{0:d}'.format(config.multipoles.skew_field_fitting_monomials[i])+')')
+            monomials.append('PolyA(n='+'{0:d}'.format(
+                config.multipoles.skew_field_fitting_monomials[i])+')')
         else:
-            monomials.append('PolyB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
+            monomials.append('PolyB(n='+'{0:d}'.format(
+                config.multipoles.normal_field_fitting_monomials[i])+')')
 
     if fmap_deflection != 0.0:
-        m[0,:] *= nominal_deflection / fmap_deflection
+        m[0, :] *= nominal_deflection / fmap_deflection
 
     pol_tp = 'polynom_a ' if config.normalization_is_skew else 'polynom_b '
     msg = '--- model ' + pol_tp
@@ -554,27 +594,29 @@ def model_analysis(config):
     for i in range(m.shape[0]):
         fstr += '{'+str(i+2)+':^+11.2e}, '
 
-    # builds list with segmented deflection agles truncated as string (satisfying sum rule)
+    # builds list with segmented deflection agles truncated as string
+    # (satisfying sum rule)
     angles = []
     for i in range(len(l)):
         tmp_fmt = '{0:' + ang_fmt + '}'
-        angles.append(tmp_fmt.format(m[0,i]*180/math.pi))
-    tot_angle = sum(m[0,:] * 180 / math.pi)
+        angles.append(tmp_fmt.format(m[0, i]*180/math.pi))
+    tot_angle = sum(m[0, :] * 180 / math.pi)
     tot_angle_trunc = sum([float(angle) for angle in angles])
-    maxv = max(m[0,:])
-    idx = list(m[0,:]).index(maxv)
+    maxv = max(m[0, :])
+    idx = list(m[0, :]).index(maxv)
     nvalue = float(angles[idx])
     nvalue += tot_angle - tot_angle_trunc
     angles[idx] = tmp_fmt.format(nvalue)
 
     # generates print-out
     for i in range(len(l)):
-        if 0 not in config.multipoles.normal_field_fitting_monomials and 0 not in config.multipoles.skew_field_fitting_monomials:
-            val = [l[i]] + [0.0] + list(m[:,i] / l[i])
+        if 0 not in config.multipoles.normal_field_fitting_monomials and \
+           0 not in config.multipoles.skew_field_fitting_monomials:
+            val = [l[i]] + [0.0] + list(m[:, i] / l[i])
         else:
-            angle = m[0,i] * 180 / math.pi
-            #val = [l[i]] + [angle] + list(m[:,i] / l[i])
-            val = [l[i]] + [float(angles[i])] + list(m[:,i] / l[i])
+            # angle = m[0, i] * 180 / math.pi
+            # val = [l[i]] + [angle] + list(m[:,i] / l[i])
+            val = [l[i]] + [float(angles[i])] + list(m[:, i] / l[i])
             if i == len(l)-1:
                 val[2] = error_deflection / l[i]
             else:
@@ -583,47 +625,68 @@ def model_analysis(config):
 
     return config
 
-def model_analysis_orig(config):
+
+def model_analysis_reftraj(config):
+    """Create model when traj is from a reference.
+
+    Tested only with BO dipoles.
+    """
 
     # creates AT model
-    config = create_AT_model_orig(config, config.model_segmentation)
+    config = create_AT_model(config, config.model_segmentation)
 
     # adds discrepancy of deflection angle as error in polynomb[0]
     l = np.array(config.model_segmentation) / 1000.0
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
-    mi = np.sum(m, axis=1)
-    fmap_deflection    = mi[0]
-    nominal_deflection = abs(config.model_nominal_angle/2)*(math.pi/180.0)
-    error_polynomb = -(nominal_deflection - fmap_deflection)
+    a = config.model_traj_angle * (180.0/np.pi)
 
     # prints info on model
-    nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
+    if config.normalization_is_skew:
+        nr_monomials = len(config.multipoles.skew_field_fitting_monomials)
+    else:
+        nr_monomials = len(config.multipoles.normal_field_fitting_monomials)
+
+    # header
+    pol_tp = 'polynom_a ' if config.normalization_is_skew else 'polynom_b '
+    msg = '--- model ' + pol_tp
+    msg += '(rz '
+    msg += '> 0). ' if config.traj.s[-1] > config.traj.s[0] else '< 0). '
+    msg += 'units: [m] for length, [rad] for angle and [m^(n-1)] for '
+    msg += pol_tp + '---'
+    print(msg)
 
     monomials = []
-    strapp = '{0:^6s} {1:^14s} '
+    strapp = '{0:^9s}  {1:^10s}  '
     for i in range(nr_monomials):
-        strapp += '{'+'{0}'.format(2+i)+':^14s} '
-        monomials.append('PolynomB(n='+'{0:d}'.format(config.multipoles.normal_field_fitting_monomials[i])+')')
-
-    m[0,:] *= nominal_deflection / fmap_deflection
-
-    print('--- model polynom_b (rz > 0). units: [mm] for length, [rad] for angle and [m],[T] for polynom_b ---')
-    print(strapp.format('len[mm]', 'angle[rad]', *monomials))
-
-    fstr = '{0:<7.4f} {1:<+14.06e} '
-    for i in range(m.shape[0]):
-        fstr += '{'+str(i+2)+':<+14.6e} '
-    for i in range(len(l)):
-        val = [l[i]] + [m[0,i]] + list(m[:,i] / l[i])
-        if i == len(l)-1:
-            val[2] = error_polynomb / l[i]
+        strapp += '{'+'{0}'.format(2+i)+':^11s}  '
+        if config.normalization_is_skew:
+            monomials.append('PolyA(n='+'{0:d}'.format(
+                config.multipoles.skew_field_fitting_monomials[i])+')')
         else:
-            val[2] = 0.0
+            monomials.append('PolyB(n='+'{0:d}'.format(
+                config.multipoles.normal_field_fitting_monomials[i])+')')
+    print(strapp.format('len[m]', 'angle[deg]', *monomials))
+
+    ang_fmt = '+10.5f'
+    fstr = '{0:^8.4f}, {1:^' + ang_fmt + '}, '
+    for i in range(m.shape[0]):
+        fstr += '{'+str(i+2)+':^+11.2e}, '
+
+    # builds list with segmented deflection agles truncated as string
+    # (satisfying sum rule)
+    angles = []
+    for i in range(len(l)):
+        tmp_fmt = '{0:' + ang_fmt + '}'
+        angles.append(tmp_fmt.format(a[i]))
+
+    # generates print-out
+    for i in range(len(l)):
+        if 0 not in config.multipoles.normal_field_fitting_monomials and \
+           0 not in config.multipoles.skew_field_fitting_monomials:
+            val = [l[i]] + [0.0] + list(m[:, i] / l[i])
+        else:
+            m[0, i] = m[0, i] - a[i] * (np.pi / 180.0)
+            val = [l[i]] + [float(angles[i])] + list(m[:, i] / l[i])
         print(fstr.format(*val))
-    val = [sum(l)] + [sum(m[0,:])] + [0.0] + list(mi[1:])
-    print('--- integrated polynom_b (rz > 0). units: [mm] for length, [rad] for angle and [m],[T] for polynom_b ---')
-    #val[1] = nominal_deflection
-    val[2] = error_polynomb / val[0]
-    print(fstr.format(*val))
 
     return config
