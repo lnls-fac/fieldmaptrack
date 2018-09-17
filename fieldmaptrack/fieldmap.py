@@ -61,16 +61,18 @@ class FieldMapSet:
             field[:,i] = self.interpolate(*points[:,i])
         return field
 
+
 class FieldMap:
+    """."""
 
     def __init__(self,
-                 fname = None,
-                 field_function = None,
-                 polyfit_exponents = None,
-                 rotation = 0.0,
-                 translation = (0,0),
-                 rescale_factor = 1.0):
-
+                 fname=None,
+                 field_function=None,
+                 polyfit_exponents=None,
+                 rotation=0.0,
+                 translation=(0, 0),
+                 rescale_factor=1.0):
+        """."""
         self.filename = fname
         self.fieldmap_label = None
         self.field_function = field_function
@@ -78,11 +80,11 @@ class FieldMap:
         self.translation = translation
         self.rescale_factor = rescale_factor
 
-        self.rx,       self.ry,       self.rz        = None, None, None # unique and sorted 1D numpy arrays with values of corresponding coordinates
-        self.rx_nrpts, self.ry_nrpts, self.rz_nrpts  = None, None, None # number of distinct values of each coordinate in the fieldmap
-        self.rx_min,   self.ry_min,   self.rz_min    = None, None, None # minimum values of coordinates
-        self.rx_max,   self.ry_max,   self.rz_max    = None, None, None # maximum values of coordinates
-        self.rx_step,  self.step,     self.rz_step   = None, None, None # spacing between consecutive coordinate values
+        self.rx, self.ry, self.rz = None, None, None # unique and sorted 1D numpy arrays with values of corresponding coordinates
+        self.rx_nrpts, self.ry_nrpts, self.rz_nrpts = None, None, None # number of distinct values of each coordinate in the fieldmap
+        self.rx_min, self.ry_min, self.rz_min = None, None, None # minimum values of coordinates
+        self.rx_max, self.ry_max, self.rz_max = None, None, None # maximum values of coordinates
+        self.rx_step, self.step, self.rz_step = None, None, None # spacing between consecutive coordinate values
 
         if self.field_function is None and self.filename is None:
             raise IrregularFieldMap('source of field not defined!')
@@ -128,19 +130,34 @@ class FieldMap:
         ''' data section '''
         raw_data = np.fromstring(content[idx+1:], dtype=float, sep=' ')
         data = raw_data.view()
-        data.shape = (-1,6)
+        data.shape = (-1, 6)
+
+        # data2 = []
+        # for i in range(data.shape[0]):
+        #     if abs(data[i, 0]) in [4*j for j in range(21)]:
+        #         data2.append(data[i, :])
+        # data = np.array(data2)
+        # print(data2.shape)
+
         # position data
-        self.rx = np.unique(data[:,0])
-        self.ry = np.unique(data[:,1])
-        self.rz = np.unique(data[:,2])
-        self.rx_min, self.rx_max, self.rx_nrpts = min(self.rx), max(self.rx), len(self.rx)
-        self.ry_min, self.ry_max, self.ry_nrpts = min(self.ry), max(self.ry), len(self.ry)
-        self.rz_min, self.rz_max, self.rz_nrpts = min(self.rz), max(self.rz), len(self.rz)
+        self.rx = np.unique(data[:, 0])
+        # print(self.rx)
+        self.ry = np.unique(data[:, 1])
+        self.rz = np.unique(data[:, 2])
+        self.rx_min, self.rx_max, self.rx_nrpts = \
+            min(self.rx), max(self.rx), len(self.rx)
+        self.ry_min, self.ry_max, self.ry_nrpts = \
+            min(self.ry), max(self.ry), len(self.ry)
+        self.rz_min, self.rz_max, self.rz_nrpts = \
+            min(self.rz), max(self.rz), len(self.rz)
         if self.rx_nrpts * self.ry_nrpts * self.rz_nrpts != data.shape[0]:
             raise IrregularFieldMap('not a rectangular grid')
-        self.rx_step = (self.rx_max - self.rx_min) / (self.rx_nrpts - 1.0) if self.rx_nrpts > 1 else 0.0
-        self.ry_step = (self.ry_max - self.ry_min) / (self.ry_nrpts - 1.0) if self.ry_nrpts > 1 else 0.0
-        self.rz_step = (self.rz_max - self.rz_min) / (self.rz_nrpts - 1.0) if self.rz_nrpts > 1 else 0.0
+        self.rx_step = (self.rx_max - self.rx_min) / (self.rx_nrpts - 1.0) \
+            if self.rx_nrpts > 1 else 0.0
+        self.ry_step = (self.ry_max - self.ry_min) / (self.ry_nrpts - 1.0) \
+            if self.ry_nrpts > 1 else 0.0
+        self.rz_step = (self.rz_max - self.rz_min) / (self.rz_nrpts - 1.0) \
+            if self.rz_nrpts > 1 else 0.0
         self.rx_zero = np.where(self.rx == 0)[0][0]
         self.ry_zero = np.where(self.ry == 0)[0][0]
         try:
