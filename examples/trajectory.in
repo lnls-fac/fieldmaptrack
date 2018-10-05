@@ -17,7 +17,7 @@
 # accurately obtain the trajectory of the electron with arbitrary energy
 #
 # Runge-kutta algorithm used for the integration of the eqs. of motion needs to know
-# what to do when trajectory reachs the fieldmap bounds. It will either extrapolate the field
+# what to do when trajectory reaches the fieldmap bounds. It will either extrapolate the field
 # along the longitudinal (z) direction or consider it to have vanished. 
 # As for the transverse directions (x and y), the RK algorithm will 
 # generate exceptions.

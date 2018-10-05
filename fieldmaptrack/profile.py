@@ -191,19 +191,19 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         plt.show()
     elif magnet_type[0] == 'corrector':
         dip_idx = harmonics.index(0)
-        dip = np.array(data[:,dip_idx+2])
+        dip = np.array(data[:, dip_idx+2])
         try:
             sext_idx = harmonics.index(2)
-            sext = data[:,sext_idx+2]
+            sext = data[:, sext_idx+2]
         except:
             sext = 0 * dip
         try:
             quad_idx = harmonics.index(1)
-            quad = data[:,quad_idx+2]
+            quad = data[:, quad_idx+2]
         except:
             quad = 0 * dip
-        lens, angle = np.array(data[:,0]), np.array(data[:,1])
-        brho = mathphys.beam_optics.beam_rigidity(energy = energy)[0]
+        lens, angle = np.array(data[:, 0]), np.array(data[:, 1])
+        brho = mathphys.beam_optics.beam_rigidity(energy=energy)[0]
         field = -dip * brho
         # --- table ---
         print('|-')
@@ -221,7 +221,6 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
             s.append(s0+lens[i]), f.append(field[i])
             s.append(s0+lens[i]), f.append(0)
         plt.fill(s,f, 'lightblue')
-        print(s,f)
         plt.fill([0, s[-1]], [0, 0], 'lightblue')
         plt.plot(s,f, 'k'); plt.plot([0, s[-1]], [0, 0], 'k')
         # --- runge-kutta profile ---
