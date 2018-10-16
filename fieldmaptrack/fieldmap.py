@@ -350,7 +350,10 @@ class FieldMap:
         r += '\n{0:<35s} {1}'.format('filename:', self.filename)
         r += '\n{0:<35s} {1}'.format('magnet_label:', self.magnet_label)
         r += '\n{0:<35s} {1} mm'.format('magnet_length:', self.length)
-        r += '\n{0:<35s} {1} A'.format('main_coil_current:', self.current)
+        try:
+            r += '\n{0:<35s} {1} A'.format('main_coil_current:', self.current)
+        except:
+            pass
         try:
             r += '\n{0:<35s} {1} A'.format('main_coil_NI:', self.ni)
         except:
