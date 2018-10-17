@@ -555,8 +555,19 @@ def model_analysis_standard(config):
         error_deflection = 0.0
     else:
         fmap_deflection = mi[0]
-        nominal_deflection = abs(config.model_nominal_angle/2)*(math.pi/180.0)
+        nominal_deflection = (config.model_nominal_angle/2)*(math.pi/180.0)
         error_deflection = -(nominal_deflection - fmap_deflection)
+        # if positive deflection angle, correct field
+        # (used for negative TB dipole, for example)
+        # remember: input 'model_nominal_angle' must be negative!!!
+        if config.magnet_type == 'dipole' and sum(m[0, :]) < 0.0:
+            monomials = config.multipoles.skew_field_fitting_monomials if \
+                config.normalization_is_skew else \
+                config.multipoles.normal_field_fitting_monomials
+            for j in range(len(monomials)):
+                n = monomials[j]
+                if n != 0:
+                    m[j, :] *= (-1)**(n+1)
 
     # prints info on model
     if config.normalization_is_skew:
@@ -640,6 +651,18 @@ def model_analysis_reftraj(config):
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
     a = config.model_traj_angle * (180.0/np.pi)
 
+    # if positive deflection angle, correct field
+    # (used for negative TB dipole, for example)
+    # remember: input 'model_nominal_angle' must be negative!!!
+    if config.magnet_type == 'dipole' and sum(m[0, :]) < 0.0:
+        monomials = config.multipoles.skew_field_fitting_monomials if \
+            config.normalization_is_skew else \
+            config.multipoles.normal_field_fitting_monomials
+        for j in range(len(monomials)):
+            n = monomials[j]
+            if n != 0:
+                m[j, :] *= (-1)**(n+1)
+
     # prints info on model
     if config.normalization_is_skew:
         nr_monomials = len(config.multipoles.skew_field_fitting_monomials)
@@ -686,6 +709,7 @@ def model_analysis_reftraj(config):
             val = [l[i]] + [0.0] + list(m[:, i] / l[i])
         else:
             m[0, i] = m[0, i] - a[i] * (np.pi / 180.0)
+            # there might be a bug for negative dipoles.
             val = [l[i]] + [float(angles[i])] + list(m[:, i] / l[i])
         print(fstr.format(*val))
 
