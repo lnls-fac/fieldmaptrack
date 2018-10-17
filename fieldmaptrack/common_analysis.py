@@ -568,6 +568,7 @@ def model_analysis_standard(config):
                 n = monomials[j]
                 if n != 0:
                     m[j, :] *= (-1)**(n+1)
+            error_deflection *= -1
 
     # prints info on model
     if config.normalization_is_skew:
