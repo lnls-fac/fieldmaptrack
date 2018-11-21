@@ -1,24 +1,31 @@
+"""Track module."""
+
 import math
 import numpy as np
-import mathphys
 import fieldmaptrack.fieldmap as fieldmap
 
+
 class TrackException(Exception):
+    """TrackException class."""
+
     pass
 
+
 class SerretFrenetCoordSystem:
+    """SerretFrenetCoordSystem class."""
 
-    def __init__(self, trajectory, point_idx = 0):
-
-        t,i      =  trajectory,point_idx # syntactic-sugars
-        self.s   =  t.s[i]                # s position
-        self.p   =  np.array((t.rx[i], t.ry[i], t.rz[i])) # (rx,ry,rz) position of point
-        self.t   =  np.array((t.px[i], t.py[i], t.pz[i])) # tangential versor
-        self.t   /= math.sqrt(np.sum(self.t**2))          # renormalization
-        self.n   =  np.array((t.pz[i], t.py[i],-t.px[i])) # normal versor
-        tx,ty,tz =  self.t # syntactic-sugars
-        nx,ny,nz =  self.n # syntactic-sugars
-        self.k   =  np.array((ty*nz-tz*ny, tz*nx-tx*nz, tx*ny-ty*nx))  # skew versor k = t x n
+    def __init__(self, trajectory, point_idx=0):
+        """."""
+        t, i = trajectory, point_idx  # syntactic-sugars
+        self.s = t.s[i]                # s position
+        self.p = np.array((t.rx[i], t.ry[i], t.rz[i]))   # (rx,ry,rz) position
+        self.t = np.array((t.px[i], t.py[i], t.pz[i]))   # tangential versor
+        self.t /= math.sqrt(np.sum(self.t**2))           # renormalization
+        self.n = np.array((t.pz[i], t.py[i], -t.px[i]))  # normal versor
+        tx, ty, tz = self.t  # syntactic-sugars
+        nx, ny, nz = self.n  # syntactic-sugars
+        # skew versor k = t x n:
+        self.k = np.array((ty*nz-tz*ny, tz*nx-tx*nz, tx*ny-ty*nx))
 
     def get_transverse_line(self, grid):
 
@@ -86,7 +93,10 @@ class Trajectory:
         except (fieldmap.OutOfRangeRx,
                 fieldmap.OutOfRangeRxMin,
                 fieldmap.OutOfRangeRy):
-            raise TrackException('extrapolation at ' + str((rx, ry, rz)))
+            rstr = 'extrapolation at ' + str((rx, ry, rz))
+            # print(rstr)
+            # bx, by, bz = 0.0, 0.0, 0.0
+            raise TrackException(rstr)
         except fieldmap.OutOfRangeRz:
             bx, by, bz = 0.0, 0.0, 0.0
 
@@ -102,14 +112,14 @@ class Trajectory:
         return (derivs, bx, by, bz)
 
     def calc_trajectory_rk4(self,
-                        init_rx  = 0.0, init_ry = 0.0, init_rz = 0.0,
-                        init_px  = 0.0, init_py = 0.0, init_pz = 1.0,
-                        s_length = None,
-                        s_nrpts  = None,
-                        s_step   = None,
-                        min_rz   = None,
-                        force_midplane = False,
-                        **kwargs):
+                            init_rx=0.0, init_ry=0.0, init_rz=0.0,
+                            init_px=0.0, init_py=0.0, init_pz=1.0,
+                            s_length=None,
+                            s_nrpts=None,
+                            s_step=None,
+                            min_rz=None,
+                            force_midplane=False,
+                            **kwargs):
         """ Calculates trajectory of charged particle in an arbitrary magnetic field
 
             Algorithm              1st-order Runge-Kutta with constant step
@@ -149,7 +159,7 @@ class Trajectory:
             if s_length is not None or s_nrpts is not None:
                 raise TrackException('Neither s_length nor s_nrpts parameters should be set for this option of trajectory integration')
             s_length = 0.0
-            s_nrpts  = 0
+            s_nrpts = 0
         else:
             if s_step is None:
                 if s_length is None or s_nrpts is None:
@@ -164,9 +174,7 @@ class Trajectory:
                 else:
                     s_nrpts = 1 + int(s_length / s_step)
 
-
         # inits auxiliary data structures
-
         self.s_step = s_step
         self.force_midplane = force_midplane
         self.init_rx, self.init_ry, self.init_rz = init_rx, init_ry, init_rz
@@ -178,15 +186,14 @@ class Trajectory:
         alpha = 1.0/(1000.0*self.beam.brho)/self.beam.beta
 
         # RK integratior proper
-
         s, h, i = 0.0, self.s_step, 0
-        rx,ry,rz = init_rx, init_ry, init_rz
-        px,py,pz = init_px, init_py, init_pz
+        rx, ry, rz = init_rx, init_ry, init_rz
+        px, py, pz = init_px, init_py, init_pz
         while True:
 
             # forces midplane, if the case
             if self.force_midplane:
-                ry, py = 0.0,0.0
+                ry, py = 0.0, 0.0
 
             # calcs derivatives of the eqs. of motion
             p0 = np.array((rx, ry, rz, px, py, pz))
@@ -243,21 +250,32 @@ class Trajectory:
         bx,by,bz = [abs(x) for x in self.bx], [abs(x) for x in self.by], [abs(x) for x in self.bz]
         max_bx, max_by, max_bz = max(bx), max(by), max(bz)
 
-        s_max_bx,rx_max_bx,ry_max_bx,rz_max_bx = self.s[bx.index(max_bx)], self.rx[bx.index(max_bx)], self.ry[bx.index(max_bx)], self.rz[bx.index(max_bx)]
-        s_max_by,rx_max_by,ry_max_by,rz_max_by = self.s[by.index(max_by)], self.rx[by.index(max_by)], self.ry[by.index(max_by)], self.rz[by.index(max_by)]
-        s_max_bz,rx_max_bz,ry_max_bz,rz_max_bz = self.s[bz.index(max_bz)], self.rx[bz.index(max_bz)], self.ry[bz.index(max_bz)], self.rz[bz.index(max_bz)]
+        s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx = \
+            self.s[bx.index(max_bx)], self.rx[bx.index(max_bx)], self.ry[bx.index(max_bx)], self.rz[bx.index(max_bx)]
+        s_max_by, rx_max_by, ry_max_by, rz_max_by = \
+            self.s[by.index(max_by)], self.rx[by.index(max_by)], self.ry[by.index(max_by)], self.rz[by.index(max_by)]
+        s_max_bz, rx_max_bz, ry_max_bz, rz_max_bz = \
+            self.s[bz.index(max_bz)], self.rx[bz.index(max_bz)], self.ry[bz.index(max_bz)], self.rz[bz.index(max_bz)]
         theta_x = math.atan(self.px[-1]/self.pz[-1])
         theta_y = math.atan(self.py[-1]/self.pz[-1])
         ref_point = self.calc_reference_point()
+        dtheta_x = theta_x - math.atan(self.px[0]/self.pz[0])
+        dtheta_y = theta_y - math.atan(self.py[0]/self.pz[0])
 
-        r  = ''
-        r +=   '{0:<35s} {1:.6e} GeV'.format('beam_energy:', self.beam.energy)
-        r += '\n{0:<35s} {1:+.4e} deg.'.format('horizontal_deflection_angle:', theta_x * (180.0/math.pi))
-        r += '\n{0:<35s} {1:+.4e} deg.'.format('vertical_deflection_angle:', theta_y * (180.0/math.pi))
-        r += '\n{0:<35s} {1} mm'.format('trajectory_length:', self.s[-1]-self.s[0])
+        r = ''
+        r += '{0:<35s} {1:.6e} GeV'.format('beam_energy:', self.beam.energy)
+        r += '\n{0:<35s} {1:+.4e} deg.'.format('horizontal_deflection_angle:',
+                                               dtheta_x * (180.0/math.pi))
+        r += '\n{0:<35s} {1:+.4e} deg.'.format('vertical_deflection_angle:',
+                                               dtheta_y * (180.0/math.pi))
+        r += '\n{0:<35s} {1:+.4e} deg.'.format('final_horizontal_angle:',
+                                               theta_x * (180.0/math.pi))
+        r += '\n{0:<35s} {1:+.4e} deg.'.format('final_vertical_angle:',
+                                               theta_y * (180.0/math.pi))
+        r += '\n{0:<35s} {1} mm'.format('trajectory_length:',
+                                        self.s[-1]-self.s[0])
         r += '\n{0:<35s} {1}'.format('trajectory_nrpts:', len(self.s))
         r += '\n{0:<35s} {1} mm'.format('trajectory_s_step:', self.s_step)
-        #r += '\n{0:<35s} {1:+.1e} %'.format('trajectory_momentum_error:', 100*self.error_estimate);
 
         r += '\n{0:<35s} {1:+f} Tesla at (s,rx,ry,rz) = ({2},{3},{4},{5}) mm'.format('max_abs_bx@trajectory:', self.bx[bx.index(max_bx)], s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx)
         r += '\n{0:<35s} {1:+f} Tesla at (s,rx,ry,rz) = ({2},{3},{4},{5}) mm'.format('max_abs_by@trajectory:', self.by[by.index(max_by)], s_max_by, rx_max_by, ry_max_bx, rz_max_by)
