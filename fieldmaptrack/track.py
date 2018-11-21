@@ -28,30 +28,30 @@ class SerretFrenetCoordSystem:
         self.k = np.array((ty*nz-tz*ny, tz*nx-tx*nz, tx*ny-ty*nx))
 
     def get_transverse_line(self, grid):
-
-        points = np.zeros((3,len(grid)))
+        """."""
+        points = np.zeros((3, len(grid)))
         for i in range(len(grid)):
-            points[:,i] = self.p + grid[i] * self.n
+            points[:, i] = self.p + grid[i] * self.n
         return points
 
     def find_intersection(self, trajectory):
-
-        s  = trajectory.s
+        """."""
+        s = trajectory.s
         rx = trajectory.rx
         rz = trajectory.rz
 
         hit_i, hit_alpha, hit_dx = 0, None, None
         for i in range(len(s)-1):
-            M11   = rx[i+1] - rx[i]
-            M12   = -self.n[0]
-            M21   = rz[i+1] - rz[i]
-            M22   = -self.n[2]
-            B1    = self.p[0] - rx[i]
-            B2    = self.p[2] - rz[i]
-            detM  = M11 * M22 - M12 * M21
-            invM  = [[M22/detM, -M12/detM], [-M21/detM, M22/detM]]
+            M11 = rx[i+1] - rx[i]
+            M12 = -self.n[0]
+            M21 = rz[i+1] - rz[i]
+            M22 = -self.n[2]
+            B1 = self.p[0] - rx[i]
+            B2 = self.p[2] - rz[i]
+            detM = M11 * M22 - M12 * M21
+            invM = [[M22/detM, -M12/detM], [-M21/detM, M22/detM]]
             alpha = invM[0][0] * B1 + invM[0][1] * B2
-            dx    = invM[1][0] * B1 + invM[1][1] * B2
+            dx = invM[1][0] * B1 + invM[1][1] * B2
             if hit_alpha is None or abs(alpha) < abs(hit_alpha):
                 hit_i, hit_alpha, hit_dx = i, alpha, dx
         if hit_i == 0 and hit_alpha < 0.0:
@@ -64,28 +64,36 @@ class SerretFrenetCoordSystem:
             # interpolation
             return (hit_i, hit_alpha, hit_dx)
 
+
 class Trajectory:
+    """Trajectory class."""
 
     def __init__(self,
-                beam = None,
-                fieldmap = None):
-        self.beam     = beam
+                 beam=None,
+                 fieldmap=None):
+        """."""
+        self.beam = beam
         self.fieldmap = fieldmap
 
     def calc_trajectory(self, **kwargs):
-        #return self.calc_trajectory_rk1(**kwargs)
+        """."""
+        # return self.calc_trajectory_rk1(**kwargs)
         return self.calc_trajectory_rk4(**kwargs)
 
     def calc_reference_point(self):
-        """calcs reference point defined as intersection of two asymptoctic straight section lines"""
-        x1,z1 = self.rx[-2], self.rz[-2]
-        x2,z2 = self.rx[-1], self.rz[-1]
+        """Calc reference point.
+
+        defined as intersection of two asymptoctic
+        straight section lines.
+        """
+        x1, z1 = self.rx[-2], self.rz[-2]
+        x2, z2 = self.rx[-1], self.rz[-1]
         a = (x2-x1)/(z2-z1)
         b = 0.5*((x1+x2) - a * (z1+z2))
-        return (b,0.0)
+        return (b, 0.0)
 
     def calc_force(self, alpha, p):
-
+        """."""
         rx, ry, rz, px, py, pz = p
         # calcs magnetic field on current position
         try:
@@ -120,55 +128,68 @@ class Trajectory:
                             min_rz=None,
                             force_midplane=False,
                             **kwargs):
-        """ Calculates trajectory of charged particle in an arbitrary magnetic field
+        """Calculate trajectory of charged particle in an magnetic field.
 
             Algorithm              1st-order Runge-Kutta with constant step
             Independent variable   s: trajectory arc-length
             Dependent variables    rx,ry,rz: rectangular coordinates [mm]
-                                   px,py,pz: p0-normalized momenta [adimensional]
-                                       (px**2+py**2+pz**2 == 1)
-                                       horizontal deflection angle is atan(px/pz) [rad]
-                                       vertical deflection angle is atan(py/pz) [rad]
+                                   px,py,pz: p0-normalized momenta [no unit]
+                                     (px**2+py**2+pz**2 == 1)
+                                     horiz. defl. angle is atan(px/pz) [rad]
+                                     verti. defl. angle is atan(py/pz) [rad]
 
-            Input                  force_midplane: whether to force trajectory to midplane
-                                       (usefull, for exmaple, for dipoles)
-                                   init_rx,init_ry,init_rz: initial rectangular position
-                                       of the particle.
-                                   init_px,init_py,init_pz: initial normalized momenta
-                                       of the particle. (px,py,pz)=(0.0,0.0,1.0), for example,
-                                       represents an initial velocity along the longitudinal
-                                       direction z.
-                                   s_length,s_nrpts,s_step,min_rz: parameters that control
-                                       range of trajectory integrations. Any of subset of these
-                                       parameters may be used, so long as they are consistent.
-                                       s_nrpts:  number of points in trajectory
-                                       s_step:   fixed step size in longitudinal coordinates
-                                       s_length: trajectory length
-                                       min_rz:   integrates trajectory until while rz < min_rz
-                                                 (s_step has be to be set as well)
+            Input      force_midplane: whether to force trajectory to midplane
+                       (usefull, for exmaple, for dipoles)
+                       init_rx,init_ry,init_rz: initial rectangular position
+                       of the particle.
 
-        Output                 s: vector with longitudinal position of points on trajectory
-                                   rx,ry,rz: vector with rectangular coordinates of points on trajectory
-                                   px,py,pz: vector with normalized momenta of points on trajectory
-                                   bx,by,bz: vector with magnetic field at the points on trajectory"""
+                       init_px,init_py,init_pz: initial normalized momenta
+                       of the particle. (px,py,pz)=(0.0,0.0,1.0), for example,
+                       represents an initial velocity along the longitudinal
+                       direction z.
 
+                       s_length,s_nrpts,s_step,min_rz: parameters that control
+                       range of trajectory integrations. Any of subset of these
+                       parameters may be used, so long as they are consistent.
+                       s_nrpts:  number of points in trajectory
+                       s_step:   fixed step size in longitudinal coordinates
+                       s_length: trajectory length
+                       min_rz:   integrates trajectory until while rz < min_rz
+                                 (s_step has be to be set as well)
+
+        Output     s: vector with longitudinal position of points on trajectory
+                   rx,ry,rz: vector with rectangular coordinates of points on
+                             trajectory
+                   px,py,pz: vector with normalized momenta of points on
+                             trajectory
+                   bx,by,bz: vector with magnetic field at the points on
+                             trajectory
+        """
         # processes input parameters
         if min_rz is not None:
             if s_step is None:
-                raise TrackException('s_step has to be set for this opion of trajectory integration')
+                rstr = ('s_step has to be set for this opion of trajectory '
+                        'integration')
+                raise TrackException(rstr)
             if s_length is not None or s_nrpts is not None:
-                raise TrackException('Neither s_length nor s_nrpts parameters should be set for this option of trajectory integration')
+                rstr = ('Neither s_length nor s_nrpts parameters should be '
+                        'set for this option of trajectory integration')
+                raise TrackException(rstr)
             s_length = 0.0
             s_nrpts = 0
         else:
             if s_step is None:
                 if s_length is None or s_nrpts is None:
-                    raise TrackException('Both s_length and s_nrpts need to be set for this option of trajectory integration')
+                    rstr = ('Both s_length and s_nrpts need to be set for '
+                            'this option of trajectory integration')
+                    raise TrackException(rstr)
                 s_step = s_length / (s_nrpts - 1.0)
             else:
                 if s_length is None:
                     if s_nrpts is None:
-                        raise TrackException('s_nrpts has to be set when s_step is given and s_length is not set')
+                        rstr = ('s_nrpts has to be set when s_step is given '
+                                'and s_length is not set')
+                        raise TrackException(rstr)
                     else:
                         s_length = s_step * (s_nrpts + 1.0)
                 else:
@@ -218,14 +239,15 @@ class Trajectory:
             self.rx.append(rx), self.ry.append(ry), self.rz.append(rz)
             self.px.append(px), self.py.append(py), self.pz.append(pz)
             try:
-                self.bx.append(bx[0]), self.by.append(by[0]), self.bz.append(bz[0])
+                self.bx.append(bx[0]), self.by.append(by[0]), \
+                    self.bz.append(bz[0])
             except:
                 self.bx.append(bx), self.by.append(by), self.bz.append(bz)
 
             # propagates to next point
             rx, ry, rz, px, py, pz = p0 + (h/6.0) * (k1 + 2*k2 + 2*k3 + k4)
-            s  += self.s_step
-            i  += 1
+            s += self.s_step
+            i += 1
 
             # tests if end of integration is reached
             if min_rz is not None:
@@ -240,22 +262,29 @@ class Trajectory:
         # converts python native lists into numpy arrays
         # (appending in native lists is faster than in nympy arrays)
         self.s = np.array(self.s)
-        self.rx, self.ry, self.rz = np.array(self.rx), np.array(self.ry), np.array(self.rz)
-        self.px, self.py, self.pz = np.array(self.px), np.array(self.py), np.array(self.pz)
-        #self.bx, self.by, self.bz = np.array(self.bx), np.array(self.by), np.array(self.bz)
-        self.error_estimate = math.sqrt(self.px[-1]**2 + self.py[-1]**2 + self.pz[-1]**2) - 1.0
+        self.rx, self.ry, self.rz = \
+            np.array(self.rx), np.array(self.ry), np.array(self.rz)
+        self.px, self.py, self.pz = \
+            np.array(self.px), np.array(self.py), np.array(self.pz)
+        self.error_estimate = math.sqrt(self.px[-1]**2 + self.py[-1]**2 +
+                                        self.pz[-1]**2) - 1.0
 
     def __str__(self):
-
-        bx,by,bz = [abs(x) for x in self.bx], [abs(x) for x in self.by], [abs(x) for x in self.bz]
+        """."""
+        bx, by, bz = \
+            [abs(x) for x in self.bx], [abs(x) for x in self.by], \
+            [abs(x) for x in self.bz]
         max_bx, max_by, max_bz = max(bx), max(by), max(bz)
 
         s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx = \
-            self.s[bx.index(max_bx)], self.rx[bx.index(max_bx)], self.ry[bx.index(max_bx)], self.rz[bx.index(max_bx)]
+            self.s[bx.index(max_bx)], self.rx[bx.index(max_bx)], \
+            self.ry[bx.index(max_bx)], self.rz[bx.index(max_bx)]
         s_max_by, rx_max_by, ry_max_by, rz_max_by = \
-            self.s[by.index(max_by)], self.rx[by.index(max_by)], self.ry[by.index(max_by)], self.rz[by.index(max_by)]
+            self.s[by.index(max_by)], self.rx[by.index(max_by)], \
+            self.ry[by.index(max_by)], self.rz[by.index(max_by)]
         s_max_bz, rx_max_bz, ry_max_bz, rz_max_bz = \
-            self.s[bz.index(max_bz)], self.rx[bz.index(max_bz)], self.ry[bz.index(max_bz)], self.rz[bz.index(max_bz)]
+            self.s[bz.index(max_bz)], self.rx[bz.index(max_bz)], \
+            self.ry[bz.index(max_bz)], self.rz[bz.index(max_bz)]
         theta_x = math.atan(self.px[-1]/self.pz[-1])
         theta_y = math.atan(self.py[-1]/self.pz[-1])
         ref_point = self.calc_reference_point()
