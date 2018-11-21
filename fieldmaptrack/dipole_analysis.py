@@ -45,8 +45,13 @@ def calc_reference_trajectory_good_field_region(config):
         init_rz = config.traj_init_rz
     else:
         config.traj_init_rz = init_rz = 0.0
+    if hasattr(config, 'traj_init_px'):
+        init_px = config.traj_init_px * (math.pi/180.0)
+    else:
+        config.traj_init_px = init_px = 0.0
     init_ry = 0.0
-    init_px, init_py, init_pz = 0.0, 0.0, 1.0
+    init_py = 0.0
+    init_pz = math.sqrt(1.0 - init_px**2 - init_py**2)
     if config.traj_rk_s_step > 0.0:
         rk_min_rz = max(config.fmap.rz)
     else:
