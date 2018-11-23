@@ -58,13 +58,14 @@ def calc_reference_trajectory_good_field_region(config):
         rk_min_rz = abs(min(config.fmap.rz))
     # rk_min_rz = config.fmap.rz[-1]
     while True:
-        config.traj.calc_trajectory(init_rx=init_rx, init_ry=init_ry, init_rz=init_rz,
-                                    init_px=init_px, init_py=init_py, init_pz=init_pz,
-                                    s_step         = config.traj_rk_s_step,
-                                    s_length       = config.traj_rk_length,
-                                    s_nrpts        = config.traj_rk_nrpts,
-                                    min_rz         = rk_min_rz,
-                                    force_midplane = config.traj_force_midplane_flag)
+        config.traj.calc_trajectory(
+            init_rx=init_rx, init_ry=init_ry, init_rz=init_rz,
+            init_px=init_px, init_py=init_py, init_pz=init_pz,
+            s_step=config.traj_rk_s_step,
+            s_length=config.traj_rk_length,
+            s_nrpts=config.traj_rk_nrpts,
+            min_rz=rk_min_rz,
+            force_midplane=config.traj_force_midplane_flag)
         config.traj_sagitta = config.traj.calc_sagitta(half_dipole_length)
 
         if not config.traj_center_sagitta_flag:
