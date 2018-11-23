@@ -1,3 +1,5 @@
+"""Common Analysis."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import fieldmaptrack
@@ -49,17 +51,24 @@ def raw_fieldmap_analysis(config):
         config.interactive_mode = False
 
     # loads fieldmap from file
-    if hasattr(config, 'fmap_rescale_factor'):
-        config.fmap = fieldmaptrack.FieldMap(
-            config.fmap_filename, rescale_factor=config.fmap_rescale_factor)
-    else:
-        config.fmap = fieldmaptrack.FieldMap(config.fmap_filename)
+    transforms = dict()
+    if hasattr(config, 'transform_refactor'):
+        transforms['refactor'] = config.transform_refactor
+    if hasattr(config, 'transform_roty180'):
+        transforms['roty180'] = True
+    if not hasattr(config, 'not_raise_range_exceptions'):
+        config.not_raise_range_exceptions = False
+
+    config.fmap = fieldmaptrack.FieldMap(
+        config.fmap_filename,
+        transforms=transforms,
+        not_raise_range_exceptions=config.not_raise_range_exceptions)
 
     # plots basic data, by longitudinal profile at (x,y) = (0,0)
     if not config.interactive_mode:
         try:
             config.config_fig_number += 1
-        except:
+        except AttributeError:
             config.config_fig_number = 1
         x, y = config.fmap.rz,\
             config.fmap.by[config.fmap.ry_zero][config.fmap.rx_zero, :]
@@ -126,25 +135,30 @@ def raw_fieldmap_analysis(config):
 
 def calc_reference_trajectory(config):
 
-    config.traj = Trajectory(beam=config.beam, fieldmap=config.fmap)
-    max_z  = config.fmap.rz_max
+    config.traj = Trajectory(
+        beam=config.beam,
+        fieldmap=config.fmap,
+        not_raise_range_exceptions=config.not_raise_range_exceptions)
+    max_z = config.fmap.rz_max
     if config.traj_rk_nrpts is None:
-        config.traj_rk_nrpts = int(math.ceil(max_z * 1.0 / config.traj_rk_s_step))
+        config.traj_rk_nrpts = \
+            int(math.ceil(max_z * 1.0 / config.traj_rk_s_step))
     else:
-        rk_nrpts = config.traj_rk_nrpts
+        # rk_nrpts = config.traj_rk_nrpts
         config.traj_rk_s_step = max_z / (config.traj_rk_nrpts - 1.0)
 
     config.traj.s_step = config.traj_rk_s_step
-    #config.traj.s  = np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
+    # config.traj.s = np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
     config.traj.rx = np.array([0 for i in range(config.traj_rk_nrpts)])
     config.traj.ry = np.array([0 for i in range(config.traj_rk_nrpts)])
-    config.traj.rz = np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
+    config.traj.rz = \
+        np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
     config.traj.px = np.array([0 for i in range(config.traj_rk_nrpts)])
     config.traj.py = np.array([0 for i in range(config.traj_rk_nrpts)])
     config.traj.pz = np.array([1.0 for i in range(config.traj_rk_nrpts)])
-    config.traj.s  = np.array(config.traj.rz)
+    config.traj.s = np.array(config.traj.rz)
 
-    # rever!!! XRR
+    # TODO: rever!!! XRR
     #config.traj.bx = np.array([0 for i in range(config.traj_rk_nrpts)])
     #config.traj.by = np.array([0 for i in range(config.traj_rk_nrpts)])
     #config.traj.bz = np.array([0 for i in range(config.traj_rk_nrpts)])
@@ -156,15 +170,18 @@ def calc_reference_trajectory(config):
 
 
 def trajectory_analysis(config):
-
+    """Trajectory analysis."""
     if config.traj_load_filename is not None:
         # loads trajectory from file
-        config.beam = fieldmaptrack.Beam(energy = config.beam_energy)
-        config.traj = fieldmaptrack.Trajectory(beam=config.beam, fieldmap=config.fmap)
+        config.beam = fieldmaptrack.Beam(energy=config.beam_energy)
+        config.traj = fieldmaptrack.Trajectory(
+            beam=config.beam,
+            fieldmap=config.fmap,
+            not_raise_range_exceptions=config.not_raise_range_exceptions)
         config.traj.load(config.traj_load_filename)
     else:
         # calcs trajectory centered in good-field-region
-        config.beam = fieldmaptrack.Beam(energy = config.beam_energy)
+        config.beam = fieldmaptrack.Beam(energy=config.beam_energy)
         config = calc_reference_trajectory(config)
 
     # prints basic information on the reference trajectory
@@ -173,10 +190,12 @@ def trajectory_analysis(config):
     print(config.traj)
 
     # saves trajectory in file
-    if not config.interactive_mode: config.traj.save(filename='trajectory.txt')
+    if not config.interactive_mode:
+        config.traj.save(filename='trajectory.txt')
 
     # saves field on trajectory in file
-    if not config.interactive_mode: config.traj.save_field(filename='field_on_trajectory.txt')
+    if not config.interactive_mode:
+        config.traj.save_field(filename='field_on_trajectory.txt')
 
     return config
 
@@ -185,31 +204,48 @@ def multipoles_analysis(config):
 
     # calcs multipoles around reference trajectory
     # ============================================
-    config.multipoles = fieldmaptrack.Multipoles(trajectory=config.traj,
-                                         perpendicular_grid=config.multipoles_perpendicular_grid,
-                                         normal_field_fitting_monomials=config.multipoles_normal_field_fitting_monomials,
-                                         skew_field_fitting_monomials=config.multipoles_skew_field_fitting_monomials)
-    config.multipoles.calc_multipoles(is_ref_trajectory_flag = False)
+    config.multipoles = fieldmaptrack.Multipoles(
+        trajectory=config.traj,
+        perpendicular_grid=config.multipoles_perpendicular_grid,
+        normal_field_fitting_monomials=config.multipoles_normal_field_fitting_monomials,
+        skew_field_fitting_monomials=config.multipoles_skew_field_fitting_monomials)
+    config.multipoles.calc_multipoles(is_ref_trajectory_flag=False)
     config.multipoles.calc_multipoles_integrals()
     main_monomial = config.normalization_monomial
     normalization_is_skew = config.normalization_is_skew
     if normalization_is_skew:
-        config.multipoles.calc_multipoles_integrals_relative(config.multipoles.skew_multipoles_integral, main_monomial = main_monomial, r0 = config.multipoles_r0, is_skew = True)
+        config.multipoles.calc_multipoles_integrals_relative(
+            config.multipoles.skew_multipoles_integral,
+            main_monomial=main_monomial,
+            r0=config.multipoles_r0,
+            is_skew=True)
         monomials = config.multipoles.skew_field_fitting_monomials
         idx_n = monomials.index(main_monomial)
         idx_z = list(config.traj.s).index(0.0)
-        main_multipole_center = config.multipoles.skew_multipoles[idx_n,idx_z]
-        config.multipoles.effective_length = config.multipoles.skew_multipoles_integral[idx_n] / main_multipole_center
-        if not config.interactive_mode: config.multipoles.save('multipoles.txt', is_skew=True) # saves multipoles to file
+        main_multipole_center = config.multipoles.skew_multipoles[idx_n, idx_z]
+        config.multipoles.effective_length = \
+            config.multipoles.skew_multipoles_integral[idx_n] / \
+            main_multipole_center
+        if not config.interactive_mode:
+            # saves multipoles to file
+            config.multipoles.save('multipoles.txt', is_skew=True)
     else:
-        config.multipoles.calc_multipoles_integrals_relative(config.multipoles.normal_multipoles_integral, main_monomial = main_monomial, r0 = config.multipoles_r0, is_skew = False)
+        config.multipoles.calc_multipoles_integrals_relative(
+            config.multipoles.normal_multipoles_integral,
+            main_monomial=main_monomial,
+            r0=config.multipoles_r0,
+            is_skew=False)
         monomials = config.multipoles.normal_field_fitting_monomials
         idx_n = monomials.index(main_monomial)
         idx_z = list(config.traj.s).index(0.0)
-        main_multipole_center = config.multipoles.normal_multipoles[idx_n,idx_z]
-        config.multipoles.effective_length = config.multipoles.normal_multipoles_integral[idx_n] / main_multipole_center
-        if not config.interactive_mode: config.multipoles.save('multipoles.txt', is_skew=False) # saves multipoles to file
-
+        main_multipole_center = \
+            config.multipoles.normal_multipoles[idx_n, idx_z]
+        config.multipoles.effective_length = \
+            config.multipoles.normal_multipoles_integral[idx_n] / \
+            main_multipole_center
+        if not config.interactive_mode:
+            # saves multipoles to file
+            config.multipoles.save('multipoles.txt', is_skew=False)
 
     # prints basic information on multipoles
     # ======================================
@@ -230,36 +266,36 @@ def multipoles_analysis(config):
 
 
 def plot_residual_field_in_curvilinear_system(config):
-
-    """ NOT TO BE USED! """
-
+    """NOT TO BE USED."""
     main_monomials = config.multipoles_main_monomials
 
     r0 = config.multipoles_r0/1000.0
-    x = np.linspace(0,1.0 * r0,20)
+    x = np.linspace(0, 1.0*r0, 20)
 
     # by field reconstructed from fitted polynomials
     dby, by0 = 0*x, 0*x
-    n   = config.multipoles.normal_field_fitting_monomials
-    m   = config.multipoles.normal_multipoles_integral
+    n = config.multipoles.normal_field_fitting_monomials
+    m = config.multipoles.normal_multipoles_integral
 
     for i in range(len(n)):
         if n[i] not in main_monomials:
-            dby += m[i] * (x ** n[i]) # [T.m]
+            dby += m[i] * (x ** n[i])  # [T.m]
         else:
-            #dby += m[i] * (x ** n[i]) # [T.m]
-            by0 += m[i] * (x ** n[i]) # [T.m]
-
+            #  dby += m[i] * (x ** n[i]) # [T.m]
+            by0 += m[i] * (x ** n[i])  # [T.m]
 
     # by field calculated from fieldmap interpolation
     by = 0*x
-    traj = Trajectory(beam=config.beam, fieldmap=config.fmap)
+    traj = Trajectory(
+        beam=config.beam,
+        fieldmap=config.fmap,
+        not_raise_range_exceptions=config.not_raise_range_exceptions)
     for i in range(len(x)):
-        traj.calc_trajectory(init_rx = 9.045 + 1000*x[i],
-                             s_step = config.fmap.rz_step/2.0,
-                             min_rz = config.fmap.rz[-1],
-                             force_midplane = True)
-        by[i] = np.trapz(y = traj.by, x = traj.s/1.0e3) # [T.m]
+        traj.calc_trajectory(init_rx=9.045 + 1000*x[i],
+                             s_step=config.fmap.rz_step/2.0,
+                             min_rz=config.fmap.rz[-1],
+                             force_midplane=True)
+        by[i] = np.trapz(y=traj.by, x=traj.s/1.0e3)  # [T.m]
     dby2 = by - 1*by0
 
     try:
@@ -269,13 +305,13 @@ def plot_residual_field_in_curvilinear_system(config):
 
     kick1 = 1e6 * dby / config.beam.brho
     kick2 = 1e6 * dby2 / config.beam.brho
-    plt.plot(x*1000,kick1)
-    plt.plot(x*1000,kick2)
-    #plt.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
+    plt.plot(x*1000, kick1)
+    plt.plot(x*1000, kick2)
+    # plt.gca().get_yaxis().get_major_formatter().set_powerlimits((0, 0))
     plt.xlabel('x [mm]')
     plt.ylabel('residual integrated field [urad]')
     plt.grid(True)
-    #plt.plot(x*1000,dby_r02)
+    # plt.plot(x*1000,dby_r02)
     plt.show()
 
     return config

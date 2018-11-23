@@ -98,7 +98,8 @@ class FieldMapSet:
                     OutOfRangeRy):
                 rstr = 'Rx or Ry extrapolation at ' + \
                     str((rx_global, ry_global, rz_global))
-                raise track.TrackException(rstr)
+                # print(rstr)
+                raise OutOfRange(rstr)
             except OutOfRangeRz:
                 tbx, tby, tbz = 0.0, 0.0, 0.0
 
@@ -113,7 +114,7 @@ class FieldMapSet:
         """."""
         field = np.zeros(points.shape)
         for i in range(points.shape[1]):
-            field[:,i] = self.interpolate(*points[:,i])
+            field[:, i] = self.interpolate(*points[:, i])
         return field
 
 
@@ -126,14 +127,16 @@ class FieldMap:
                  polyfit_exponents=None,
                  rotation=0.0,
                  translation=(0, 0),
-                 rescale_factor=1.0):
-        """."""
+                 transforms=None,
+                 not_raise_range_exceptions=False):
+        """Init method."""
         self.filename = fname
         self.fieldmap_label = None
         self.field_function = field_function
         self.rotation = rotation
         self.translation = translation
-        self.rescale_factor = rescale_factor
+        self.transforms = dict() if transforms is None else transforms
+        self.not_raise_range_exceptions = not_raise_range_exceptions
 
         # unique and sorted 1D numpy arrays with values of
         # corresponding coordinates:
@@ -198,9 +201,15 @@ class FieldMap:
         data = raw_data.view()
         data.shape = (-1, 6)
 
+        # pre-apply transformations
+        if 'roty180' in self.transforms:
+            data[:, [0, 2, 3, 5]] = -1 * data[:, [0, 2, 3, 5]]
+        if 'refactor' in self.transforms:
+            f = self.transforms['refactor']
+            data[:, [3, 4, 5]] = f * data[:, [3, 4, 5]]
+
         # position data
         self.rx = np.unique(data[:, 0])
-        # print(self.rx)
         self.ry = np.unique(data[:, 1])
         self.rz = np.unique(data[:, 2])
         self.rx_min, self.rx_max, self.rx_nrpts = \
@@ -221,7 +230,7 @@ class FieldMap:
         self.ry_zero = np.where(self.ry == 0)[0][0]
         try:
             self.rz_zero = np.where(self.rz == 0)[0][0]
-        except:
+        except IndexError:
             print('data set does not contain z=0 !')
             self.rz_zero = 0
             for i in range(len(self.rz)):
@@ -234,11 +243,22 @@ class FieldMap:
         self.bx.shape, self.by.shape, self.bz.shape = \
             (-1, self.rx_nrpts), (-1, self.rx_nrpts), (-1, self.rx_nrpts)
 
-        # rescale field
-        if self.rescale_factor != 1.0:
-            self.bx *= self.rescale_factor
-            self.by *= self.rescale_factor
-            self.bz *= self.rescale_factor
+        # post-apply transformations
+        if 'roty180' in self.transforms:
+            self.bx = np.flip(np.flip(self.bx, 0), 1)
+            self.by = np.flip(np.flip(self.by, 0), 1)
+            self.bz = np.flip(np.flip(self.bz, 0), 1)
+
+        # # rescale field
+        # if 'refactor' in self.transforms:
+        #     self.bx *= self.transforms['refactor']
+        #     self.by *= self.transforms['refactor']
+        #     self.bz *= self.transforms['refactor']
+        #
+        # # TODO: temporary flip - Rot_y(180)
+        # self.by = np.flip(self.by, 0)
+        # self.by = np.flip(self.by, 1)
+        # print('!!!temporary flip of By!!!')
 
         # lookup tables for field interpolation
         kind = 'cubic'
@@ -387,16 +407,22 @@ class FieldMap:
         #     print(max_rx)
 
         if rx < self.rx_min:
-            rstr = 'Rx extrapolation rx = {0:f} < rx_min = {1:f} [mm]'.format(rx, self.rx_min)
-            # print(rstr)
-            raise OutOfRangeRxMin(rstr)
-            # return (0, 0, 0)
+            rstr = ('Rx extrapolation rx = {0:f} < rx_min = '
+                    '{1:f} [mm]').format(rx, self.rx_min)
+            if self.not_raise_range_exceptions:
+                print(rstr)
+            else:
+                raise OutOfRangeRxMin(rstr)
+            return (0, 0, 0)
 
         if rx > self.rx_max:
-            rstr = 'Rx extrapolation rx = {0:f} > rx_max = {1:f} [mm]'.format(rx, self.rx_max)
-            # print(rstr)
-            raise OutOfRangeRxMax(rstr)
-            # return (0, 0, 0)
+            rstr = ('Rx extrapolation rx = {0:f} > rx_max = '
+                    '{1:f} [mm]').format(rx, self.rx_max)
+            if self.not_raise_range_exceptions:
+                print(rstr)
+            else:
+                raise OutOfRangeRxMax(rstr)
+            return (0, 0, 0)
 
         field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
 

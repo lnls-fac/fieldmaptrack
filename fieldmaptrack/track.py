@@ -70,10 +70,13 @@ class Trajectory:
 
     def __init__(self,
                  beam=None,
-                 fieldmap=None):
+                 fieldmap=None,
+                 not_raise_range_exceptions=False):
         """."""
+        print("here: ", not_raise_range_exceptions)
         self.beam = beam
         self.fieldmap = fieldmap
+        self.not_raise_range_exceptions = not_raise_range_exceptions
 
     def calc_trajectory(self, **kwargs):
         """."""
@@ -102,9 +105,11 @@ class Trajectory:
                 fieldmap.OutOfRangeRxMin,
                 fieldmap.OutOfRangeRy):
             rstr = 'extrapolation at ' + str((rx, ry, rz))
-            # print(rstr)
-            # bx, by, bz = 0.0, 0.0, 0.0
-            raise TrackException(rstr)
+            if self.not_raise_range_exceptions:
+                print(rstr)
+                bx, by, bz = 0.0, 0.0, 0.0
+            else:
+                raise TrackException(rstr)
         except fieldmap.OutOfRangeRz:
             bx, by, bz = 0.0, 0.0, 0.0
 
@@ -251,9 +256,15 @@ class Trajectory:
 
             # tests if end of integration is reached
             if min_rz is not None:
-                # integration is being done until <min_rz is reached>
-                if abs(rz) > abs(min_rz):
-                    break
+                if self.s_step > 0.0:
+                    if rz > min_rz:
+                        break
+                else:
+                    if rz < min_rz:
+                        break
+                # if abs(rz) > abs(min_rz):
+                #     print(rz, min_rz)
+                #     break
             else:
                 # integration is being done until <s_nrpts is reached>
                 if i == s_nrpts:
