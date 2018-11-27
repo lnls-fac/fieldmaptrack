@@ -73,7 +73,6 @@ class Trajectory:
                  fieldmap=None,
                  not_raise_range_exceptions=False):
         """."""
-        print("here: ", not_raise_range_exceptions)
         self.beam = beam
         self.fieldmap = fieldmap
         self.not_raise_range_exceptions = not_raise_range_exceptions
