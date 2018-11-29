@@ -127,8 +127,9 @@ def raw_fieldmap_analysis(config):
                                         polyfit_exponents = config.fmap_extrapolation_exponents)
 
     # prints basic raw information on the fieldmap
-    print('--- fieldmap ---')
-    print(config.fmap)
+    if not config.interactive_mode:
+        print('--- fieldmap ---')
+        print(config.fmap)
 
     return config
 

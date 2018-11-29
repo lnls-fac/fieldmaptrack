@@ -166,9 +166,10 @@ def trajectory_analysis(config):
 
     # prints basic information on the reference trajectory
     # ====================================================
-    print('--- trajectory (rz > {0} mm) ---'.format(config.traj_init_rz))
-    print(config.traj)
-    print('{0:<35s} {1} mm'.format('sagitta:', config.traj_sagitta))
+    if not config.interactive_mode:
+        print('--- trajectory (rz > {0} mm) ---'.format(config.traj_init_rz))
+        print(config.traj)
+        print('{0:<35s} {1} mm'.format('sagitta:', config.traj_sagitta))
 
     if not config.interactive_mode:
         # saves trajectory in file
