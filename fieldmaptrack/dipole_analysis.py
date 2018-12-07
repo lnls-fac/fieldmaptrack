@@ -1,9 +1,8 @@
 """Dipole Analysis."""
 
-import math
-import numpy as np
+import math as _math
+import numpy as _np
 import fieldmaptrack
-
 from fieldmaptrack.common_analysis import *
 
 
@@ -53,12 +52,12 @@ def calc_reference_trajectory_good_field_region(config):
     else:
         config.traj_init_rz = init_rz = 0.0
     if hasattr(config, 'traj_init_px'):
-        init_px = config.traj_init_px * (math.pi/180.0)
+        init_px = config.traj_init_px * (_math.pi/180.0)
     else:
         config.traj_init_px = init_px = 0.0
     init_ry = 0.0
     init_py = 0.0
-    init_pz = math.sqrt(1.0 - init_px**2 - init_py**2)
+    init_pz = _math.sqrt(1.0 - init_px**2 - init_py**2)
     if config.traj_rk_s_step > 0.0:
         rk_min_rz = max(config.fmap.rz)
     else:
@@ -97,8 +96,8 @@ def calc_reference_trajectory(config):
     while True:
         config.beam = fieldmaptrack.Beam(energy=energy1)
         config = calc_reference_trajectory_good_field_region(config)
-        deflection1 = (180.0/math.pi) * \
-            math.atan(config.traj.px[-1]/config.traj.pz[-1])
+        deflection1 = (180.0/_math.pi) * \
+            _math.atan(config.traj.px[-1]/config.traj.pz[-1])
         if deflection1 > nominal_deflection:
             break
         energy1 *= 1.005
@@ -107,8 +106,8 @@ def calc_reference_trajectory(config):
     while True:
         config.beam = fieldmaptrack.Beam(energy=energy2)
         config = calc_reference_trajectory_good_field_region(config)
-        deflection2 = (180.0/math.pi) * \
-            math.atan(config.traj.px[-1]/config.traj.pz[-1])
+        deflection2 = (180.0/_math.pi) * \
+            _math.atan(config.traj.px[-1]/config.traj.pz[-1])
         if deflection2 < nominal_deflection:
             break
         energy2 *= 0.995
@@ -119,8 +118,8 @@ def calc_reference_trajectory(config):
         energy = 0.5 * (energy1 + energy2)
         config.beam = fieldmaptrack.Beam(energy=energy)
         config = calc_reference_trajectory_good_field_region(config)
-        deflection = (180.0/math.pi) * \
-            math.atan(config.traj.px[-1]/config.traj.pz[-1])
+        deflection = (180.0/_math.pi) * \
+            _math.atan(config.traj.px[-1]/config.traj.pz[-1])
         if deflection > nominal_deflection:
             energy1 = energy
         else:
@@ -214,7 +213,7 @@ def multipoles_analysis(config):
         sel = config.traj.s < config.hardedge_half_region
         s = config.traj.s[sel]
         field = config.multipoles.normal_multipoles[idx_n, sel]
-        integrated_field = np.trapz(field, s)
+        integrated_field = _np.trapz(field, s)
         hardedge_field = integrated_field / config.hardedge_half_region
         config.multipoles.effective_length = \
             config.multipoles.normal_multipoles_integral[idx_n] / \

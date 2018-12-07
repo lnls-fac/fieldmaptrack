@@ -88,7 +88,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
 
     if magnet_type[0] == 'dipole':
         lens, angle, quad, sext = np.array(data[:,0]), np.array(data[:,1]), data[:,3], data[:,4]
-        brho = mathphys.beam_optics.beam_rigidity(energy = energy)[0]
+        brho = mathphys.beam_optics.beam_rigidity(energy=energy/1e9)[0]
         field = -brho * (math.pi/180.0) * (angle / lens)
         # --- table ---
         print('|-')
@@ -124,7 +124,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         except:
             sext = 0 * quad
         lens, angle = np.array(data[:,0]), np.array(data[:,1])
-        brho = mathphys.beam_optics.beam_rigidity(energy = energy)[0]
+        brho = mathphys.beam_optics.beam_rigidity(energy=energy/1e9)[0]
         field = -brho * (math.pi/180.0) * (angle / lens)
         # --- table ---
         print('|-')
@@ -161,7 +161,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         except:
             quad = 0 * sext
         lens, angle = np.array(data[:,0]), np.array(data[:,1])
-        brho = mathphys.beam_optics.beam_rigidity(energy = energy)[0]
+        brho = mathphys.beam_optics.beam_rigidity(energy=energy/1e9)[0]
         field = -brho * (math.pi/180.0) * (angle / lens)
         # --- table ---
         print('|-')
@@ -203,7 +203,7 @@ def print_wiki_table(magnet_label, magnet_type, harmonics, energy, data, multipo
         except:
             quad = 0 * dip
         lens, angle = np.array(data[:, 0]), np.array(data[:, 1])
-        brho = mathphys.beam_optics.beam_rigidity(energy=energy)[0]
+        brho = mathphys.beam_optics.beam_rigidity(energy=energy/1e9)[0]
         field = -dip * brho
         # --- table ---
         print('|-')

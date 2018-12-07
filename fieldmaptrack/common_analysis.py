@@ -1,7 +1,7 @@
 """Common Analysis."""
 
 import matplotlib.pyplot as plt
-import numpy as np
+import numpy as _np
 import fieldmaptrack
 import math
 from fieldmaptrack.track import Trajectory
@@ -150,19 +150,19 @@ def calc_reference_trajectory(config):
 
     config.traj.s_step = config.traj_rk_s_step
     # config.traj.s = np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
-    config.traj.rx = np.array([0 for i in range(config.traj_rk_nrpts)])
-    config.traj.ry = np.array([0 for i in range(config.traj_rk_nrpts)])
+    config.traj.rx = _np.array([0 for i in range(config.traj_rk_nrpts)])
+    config.traj.ry = _np.array([0 for i in range(config.traj_rk_nrpts)])
     config.traj.rz = \
-        np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
-    config.traj.px = np.array([0 for i in range(config.traj_rk_nrpts)])
-    config.traj.py = np.array([0 for i in range(config.traj_rk_nrpts)])
-    config.traj.pz = np.array([1.0 for i in range(config.traj_rk_nrpts)])
-    config.traj.s = np.array(config.traj.rz)
+        _np.array([config.traj.s_step * i for i in range(config.traj_rk_nrpts)])
+    config.traj.px = _np.array([0 for i in range(config.traj_rk_nrpts)])
+    config.traj.py = _np.array([0 for i in range(config.traj_rk_nrpts)])
+    config.traj.pz = _np.array([1.0 for i in range(config.traj_rk_nrpts)])
+    config.traj.s = _np.array(config.traj.rz)
 
     # TODO: rever!!! XRR
-    #config.traj.bx = np.array([0 for i in range(config.traj_rk_nrpts)])
-    #config.traj.by = np.array([0 for i in range(config.traj_rk_nrpts)])
-    #config.traj.bz = np.array([0 for i in range(config.traj_rk_nrpts)])
+    #config.traj.bx = _np.array([0 for i in range(config.traj_rk_nrpts)])
+    #config.traj.by = _np.array([0 for i in range(config.traj_rk_nrpts)])
+    #config.traj.bz = _np.array([0 for i in range(config.traj_rk_nrpts)])
     config.traj.bx = [0 for i in range(config.traj_rk_nrpts)]
     config.traj.by = [0 for i in range(config.traj_rk_nrpts)]
     config.traj.bz = [0 for i in range(config.traj_rk_nrpts)]
@@ -271,7 +271,7 @@ def plot_residual_field_in_curvilinear_system(config):
     main_monomials = config.multipoles_main_monomials
 
     r0 = config.multipoles_r0/1000.0
-    x = np.linspace(0, 1.0*r0, 20)
+    x = _np.linspace(0, 1.0*r0, 20)
 
     # by field reconstructed from fitted polynomials
     dby, by0 = 0*x, 0*x
@@ -296,7 +296,7 @@ def plot_residual_field_in_curvilinear_system(config):
                              s_step=config.fmap.rz_step/2.0,
                              min_rz=config.fmap.rz[-1],
                              force_midplane=True)
-        by[i] = np.trapz(y=traj.by, x=traj.s/1.0e3)  # [T.m]
+        by[i] = _np.trapz(y=traj.by, x=traj.s/1.0e3)  # [T.m]
     dby2 = by - 1*by0
 
     try:
@@ -368,7 +368,7 @@ def plot_residual_normal_field(config):
         r0 = config.max_r_residual_field/1000
     else:
         r0 = config.multipoles_r0/1000.0
-    x = np.linspace(0,r0, 60)
+    x = _np.linspace(0,r0, 60)
 
     # by field reconstructed from fitted polynomials
     dby, by_nominal = 0*x, 0*x
@@ -382,7 +382,7 @@ def plot_residual_normal_field(config):
 
     # by field integration
     s = config.traj.s
-    by = np.zeros((len(s),len(x)))
+    by = _np.zeros((len(s),len(x)))
     for i in range(len(s)):
         sf = fieldmaptrack.SerretFrenetCoordSystem(config.traj, i)
         points = sf.get_transverse_line(1000*x)
@@ -396,7 +396,7 @@ def plot_residual_normal_field(config):
 
     intby = 0*x
     for i in range(len(x)):
-        intby[i] = np.trapz(y = by[:,i], x = s/1.0e3) # [T.m]
+        intby[i] = _np.trapz(y = by[:,i], x = s/1.0e3) # [T.m]
     dby2 = intby - 1*by_nominal
 
 
@@ -415,12 +415,12 @@ def plot_residual_normal_field(config):
     rx  = config.fmap.rx[ix:]/1000.0
     intby = [0] * len(rx)
     for i in range(len(rx)):
-        intby[i] = np.trapz(y = by[i,:], x = rz) # [T.m]
+        intby[i] = _np.trapz(y = by[i,:], x = rz) # [T.m]
     by_nominal_rawfieldgrid = 0 * rx
     for i in range(len(n)):
         if n[i] in main_monomials:
             by_nominal_rawfieldgrid += m[i] * (rx ** n[i]) # [T.m]
-    dby3 = np.array(intby) - 1*by_nominal_rawfieldgrid
+    dby3 = _np.array(intby) - 1*by_nominal_rawfieldgrid
 
 
     # plots curves
@@ -455,7 +455,7 @@ def plot_residual_skew_field(config):
         return config
 
     r0 = config.multipoles_r0/1000.0
-    x = np.linspace(0,1.0*r0, 60)
+    x = _np.linspace(0,1.0*r0, 60)
 
     # bx field reconstructed from fitted polynomials
     dbx, bx_nominal = 0*x, 0*x
@@ -469,7 +469,7 @@ def plot_residual_skew_field(config):
 
     # by field integration
     s = config.traj.s
-    bx = np.zeros((len(s),len(x)))
+    bx = _np.zeros((len(s),len(x)))
     for i in range(len(s)):
         sf = fieldmaptrack.SerretFrenetCoordSystem(config.traj, i)
         points = sf.get_transverse_line(1000*x)
@@ -477,7 +477,7 @@ def plot_residual_skew_field(config):
         bx[i,:] = field[0,:]
     intbx = 0*x
     for i in range(len(x)):
-        intbx[i] = np.trapz(y = bx[:,i], x = s/1.0e3) # [T.m]
+        intbx[i] = _np.trapz(y = bx[:,i], x = s/1.0e3) # [T.m]
     dbx2 = intbx - 1*bx_nominal
 
 
@@ -489,12 +489,12 @@ def plot_residual_skew_field(config):
     rx  = config.fmap.rx[ix:]/1000.0
     intbx = [0] * len(rx)
     for i in range(len(rx)):
-        intbx[i] = np.trapz(y = bx[i,:], x = rz) # [T.m]
+        intbx[i] = _np.trapz(y = bx[i,:], x = rz) # [T.m]
     bx_nominal_rawfieldgrid = 0 * rx
     for i in range(len(n)):
         if n[i] in main_monomials:
             bx_nominal_rawfieldgrid += m[i] * (rx ** n[i]) # [T.m]
-    dbx3 = np.array(intbx) - 1*bx_nominal_rawfieldgrid
+    dbx3 = _np.array(intbx) - 1*bx_nominal_rawfieldgrid
 
 
     # plots curves
@@ -524,47 +524,47 @@ def plot_residual_skew_field(config):
 
 def create_AT_model(config, segmentation):
     """."""
-    s = np.abs(np.copy(config.traj.s))
-    angle = np.arcsin(config.traj.px)
+    s = _np.abs(_np.copy(config.traj.s))
+    angle = _np.arcsin(config.traj.px)
     if config.normalization_is_skew:
-        p = np.copy(config.multipoles.skew_multipoles)
+        p = _np.copy(config.multipoles.skew_multipoles)
     else:
-        p = np.copy(config.multipoles.normal_multipoles)
+        p = _np.copy(config.multipoles.normal_multipoles)
     nr_monomials = len(p[:, 0])
     nr_segments = len(segmentation)
 
-    seg_border = np.append([0.0], np.cumsum(segmentation))
+    seg_border = _np.append([0.0], _np.cumsum(segmentation))
 
-    # seg_multipoles = np.zeros((nr_monomials, nr_segments))
-    model_multipoles_integral = np.zeros((nr_segments, nr_monomials))
-    model_traj_angle = np.zeros(nr_segments)
+    # seg_multipoles = _np.zeros((nr_monomials, nr_segments))
+    model_multipoles_integral = _np.zeros((nr_segments, nr_monomials))
+    model_traj_angle = _np.zeros(nr_segments)
     for i in range(nr_segments-1):
         s1, s2 = seg_border[i], seg_border[i+1]
         # interpolates multipolos on borders of segment
-        m1, m2 = np.zeros((nr_monomials, 1)), np.zeros((nr_monomials, 1))
+        m1, m2 = _np.zeros((nr_monomials, 1)), _np.zeros((nr_monomials, 1))
         for j in range(nr_monomials):
-            m1[j, :], m2[j, :] = np.interp(x=s1, xp=s, fp=p[j, :]), \
-                                 np.interp(x=s2, xp=s, fp=p[j, :])
+            m1[j, :], m2[j, :] = _np.interp(x=s1, xp=s, fp=p[j, :]), \
+                                 _np.interp(x=s2, xp=s, fp=p[j, :])
         # calcs integral of multipoles within segment
         sel = (s >= s1) & (s <= s2)
-        seg_s = np.append(np.append([s1], s[sel]), [s2])
-        seg_m = np.append(np.append(m1, p[:, sel], axis=1), m2, axis=1)
-        model_multipoles_integral[i, :] = np.trapz(x=seg_s/1000, y=seg_m)
-        model_traj_angle[i] = -np.interp(x=s2, xp=s, fp=angle)
+        seg_s = _np.append(_np.append([s1], s[sel]), [s2])
+        seg_m = _np.append(_np.append(m1, p[:, sel], axis=1), m2, axis=1)
+        model_multipoles_integral[i, :] = _np.trapz(x=seg_s/1000, y=seg_m)
+        model_traj_angle[i] = -_np.interp(x=s2, xp=s, fp=angle)
     # last segment accumulates the remainder of the integrated multipoles
     s2 = seg_border[-2]
-    m2 = np.zeros((nr_monomials, 1))
+    m2 = _np.zeros((nr_monomials, 1))
     for j in range(nr_monomials):
-        m2[j, :] = np.interp(x=s2, xp=s, fp=p[j, :])
+        m2[j, :] = _np.interp(x=s2, xp=s, fp=p[j, :])
     sel = (s >= s2)
-    seg_s = np.append([s2], s[sel])
-    seg_m = np.append(m2, p[:, sel], axis=1)
-    model_multipoles_integral[-1, :] = np.trapz(x=seg_s/1000, y=seg_m)
+    seg_s = _np.append([s2], s[sel])
+    seg_m = _np.append(m2, p[:, sel], axis=1)
+    model_multipoles_integral[-1, :] = _np.trapz(x=seg_s/1000, y=seg_m)
     model_traj_angle[-1] = -angle[-1]
 
     config.model_multipoles_integral = model_multipoles_integral
     config.model_traj_angle = model_traj_angle
-    config.model_traj_angle[1:] = np.diff(model_traj_angle)
+    config.model_traj_angle[1:] = _np.diff(model_traj_angle)
     return config
 
 
@@ -583,10 +583,10 @@ def model_analysis_standard(config):
     config = create_AT_model(config, config.model_segmentation)
 
     # adds discrepancy of deflection angle as error in polynomb[0]
-    l = np.array(config.model_segmentation) / 1000.0
+    l = _np.array(config.model_segmentation) / 1000.0
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
 
-    mi = np.sum(m, axis=1)
+    mi = _np.sum(m, axis=1)
     if 0 not in config.multipoles.normal_field_fitting_monomials:
         fmap_deflection = 0.0
         error_deflection = 0.0
@@ -685,9 +685,9 @@ def model_analysis_reftraj(config):
     config = create_AT_model(config, config.model_segmentation)
 
     # adds discrepancy of deflection angle as error in polynomb[0]
-    l = np.array(config.model_segmentation) / 1000.0
+    l = _np.array(config.model_segmentation) / 1000.0
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
-    a = config.model_traj_angle * (180.0/np.pi)
+    a = config.model_traj_angle * (180.0/_np.pi)
 
     # if positive deflection angle, correct field
     # (used for negative TB dipole, for example)
@@ -746,7 +746,7 @@ def model_analysis_reftraj(config):
            0 not in config.multipoles.skew_field_fitting_monomials:
             val = [l[i]] + [0.0] + list(m[:, i] / l[i])
         else:
-            m[0, i] = m[0, i] - a[i] * (np.pi / 180.0)
+            m[0, i] = m[0, i] - a[i] * (_np.pi / 180.0)
             # there might be a bug for negative dipoles.
             val = [l[i]] + [float(angles[i])] + list(m[:, i] / l[i])
         print(fstr.format(*val))
