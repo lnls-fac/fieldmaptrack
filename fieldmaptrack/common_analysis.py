@@ -534,13 +534,12 @@ def create_AT_model(config, segmentation):
     nr_segments = len(segmentation)
 
     seg_border = _np.append([0.0], _np.cumsum(segmentation))
-
     # seg_multipoles = _np.zeros((nr_monomials, nr_segments))
     model_multipoles_integral = _np.zeros((nr_segments, nr_monomials))
     model_traj_angle = _np.zeros(nr_segments)
     for i in range(nr_segments-1):
         s1, s2 = seg_border[i], seg_border[i+1]
-        # interpolates multipolos on borders of segment
+        # interpolates multipoles on borders of segment
         m1, m2 = _np.zeros((nr_monomials, 1)), _np.zeros((nr_monomials, 1))
         for j in range(nr_monomials):
             m1[j, :], m2[j, :] = _np.interp(x=s1, xp=s, fp=p[j, :]), \
@@ -549,6 +548,8 @@ def create_AT_model(config, segmentation):
         sel = (s >= s1) & (s <= s2)
         seg_s = _np.append(_np.append([s1], s[sel]), [s2])
         seg_m = _np.append(_np.append(m1, p[:, sel], axis=1), m2, axis=1)
+        # if i==0:
+        #     print(seg_m)
         model_multipoles_integral[i, :] = _np.trapz(x=seg_s/1000, y=seg_m)
         model_traj_angle[i] = -_np.interp(x=s2, xp=s, fp=angle)
     # last segment accumulates the remainder of the integrated multipoles
@@ -565,6 +566,10 @@ def create_AT_model(config, segmentation):
     config.model_multipoles_integral = model_multipoles_integral
     config.model_traj_angle = model_traj_angle
     config.model_traj_angle[1:] = _np.diff(model_traj_angle)
+
+    # print(':: ', seg_border)
+    # print(':: ', _np.trapz(y=p[1, :], x=s/1000))
+    # print(':: ', sum(config.model_multipoles_integral[:, 1]))
     return config
 
 
@@ -618,7 +623,7 @@ def model_analysis_standard(config):
     monomials = []
     strapp = '{0:^9s}  {1:^10s}  '
     for i in range(nr_monomials):
-        strapp += '{'+'{0}'.format(2+i)+':^11s}  '
+        strapp += '{'+'{0}'.format(2+i)+':^13s}  '
         if config.normalization_is_skew:
             monomials.append('PolyA(n='+'{0:d}'.format(
                 config.multipoles.skew_field_fitting_monomials[i])+')')
@@ -641,7 +646,7 @@ def model_analysis_standard(config):
 
     fstr = '{0:^8.4f}, {1:^' + ang_fmt + '}, '
     for i in range(m.shape[0]):
-        fstr += '{'+str(i+2)+':^+11.2e}, '
+        fstr += '{'+str(i+2)+':^+13.4e}, '
 
     # builds list with segmented deflection agles truncated as string
     # (satisfying sum rule)
@@ -687,7 +692,7 @@ def model_analysis_reftraj(config):
     # adds discrepancy of deflection angle as error in polynomb[0]
     l = _np.array(config.model_segmentation) / 1000.0
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
-    a = config.model_traj_angle * (180.0/_np.pi)
+    a = - config.model_traj_angle * (180.0/_np.pi)
 
     # if positive deflection angle, correct field
     # (used for negative TB dipole, for example)
@@ -717,9 +722,9 @@ def model_analysis_reftraj(config):
     print(msg)
 
     monomials = []
-    strapp = '{0:^9s}  {1:^10s}  '
+    strapp = '{0:^9s}  {1:^13s}  '
     for i in range(nr_monomials):
-        strapp += '{'+'{0}'.format(2+i)+':^11s}  '
+        strapp += '{'+'{0}'.format(2+i)+':^13s}  '
         if config.normalization_is_skew:
             monomials.append('PolyA(n='+'{0:d}'.format(
                 config.multipoles.skew_field_fitting_monomials[i])+')')
@@ -728,12 +733,12 @@ def model_analysis_reftraj(config):
                 config.multipoles.normal_field_fitting_monomials[i])+')')
     print(strapp.format('len[m]', 'angle[deg]', *monomials))
 
-    ang_fmt = '+10.5f'
+    ang_fmt = '+13.8f'
     fstr = '{0:^8.4f}, {1:^' + ang_fmt + '}, '
     for i in range(m.shape[0]):
-        fstr += '{'+str(i+2)+':^+11.2e}, '
+        fstr += '{'+str(i+2)+':^+13.4e}, '
 
-    # builds list with segmented deflection agles truncated as string
+    # builds list with segmented deflection angles truncated as string
     # (satisfying sum rule)
     angles = []
     for i in range(len(l)):
@@ -747,6 +752,7 @@ def model_analysis_reftraj(config):
             val = [l[i]] + [0.0] + list(m[:, i] / l[i])
         else:
             m[0, i] = m[0, i] - a[i] * (_np.pi / 180.0)
+            # print(m[0, i], l[i], m[0, i]/l[i])
             # there might be a bug for negative dipoles.
             val = [l[i]] + [float(angles[i])] + list(m[:, i] / l[i])
         print(fstr.format(*val))
