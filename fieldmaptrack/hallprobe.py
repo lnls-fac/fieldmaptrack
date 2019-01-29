@@ -1471,16 +1471,18 @@ def save_readme_files(c2e, folder, dipole_type):
                     fp.write(sfmt.format(magnet, angle, dip, quad, sext))
 
 
-def calc_average_angles(folder, dipole_type):
+def calc_average_angles(folder, dipole_type, all_currs=False):
     """."""
     if dipole_type == 'B1':
         b2d = defaults['si-dipoles-b1']
         magnets = get_magnets_B1()
         currents = get_currents_B1()
+        curr3gev = '403'
     else:
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
+        curr3gev = '401'
 
     # def_angle = b2d['model_nominal_angle']
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
@@ -1489,6 +1491,9 @@ def calc_average_angles(folder, dipole_type):
     data = dict()
     aP, aN = [], []
     for current in currents:
+        if not all_currs and curr3gev not in current:
+            print('{} skipped!'.format(current))
+            continue
         for p in data:
             data[p][current] = []
         for magnet in magnets:
@@ -1589,18 +1594,20 @@ def plot_trajectories(folder, dipole_type):
     _plt.show()
 
 
-def calc_average_rk_traj(folder, dipole_type, plt=None):
+def calc_average_rk_traj(folder, dipole_type, plt=None, all_currs=False):
 
     if dipole_type == 'B1':
         b2d = defaults['si-dipoles-b1']
         magnets = get_magnets_B1()
         currents = get_currents_B1()
         trajfname = 'trajectory-b1-pos.in'
+        curr3gev = '403'
     else:
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
         trajfname = 'trajectory-b2-pos.in'
+        curr3gev = '401'
 
     # def_angle = b2d['model_nominal_angle']
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
@@ -1609,6 +1616,9 @@ def calc_average_rk_traj(folder, dipole_type, plt=None):
     data = dict()
     rz_avg, rz_avg = None, None
     for current in currents:
+        if not all_currs and curr3gev not in current:
+            print('{} skipped!'.format(current))
+            continue
         for p in data:
             data[p][current] = []
         for magnet in magnets:
@@ -1629,26 +1639,35 @@ def calc_average_rk_traj(folder, dipole_type, plt=None):
     return s, rx_avg, rz_avg
 
 
-def gen_trajectory(x0, le, an, s_step, s_max):
+def gen_trajectory(x0, le, an, s_step, s_max, correct=False):
     """."""
-    # print(le)
-    # print(an)
     pi = _math.pi
     an = (pi/180) * _np.array(an)
-    rho = _np.array(le)/_np.array(an)
+
+    if correct:
+        nps = _np.ceil(_np.array(le)/s_step)
+        rho = s_step / (2.0 * _np.sin(an/nps/2.0))
+    else:
+        rho = _np.array(le)/_np.array(an)
+
     s = [0.0]
-    p = [_np.array([0,x0])]
-    v = [_np.array([1,0])]
+    p = [_np.array([0, x0])]
+    v = [_np.array([1, 0])]
     C, S = _math.cos(pi/2), _math.sin(pi/2)
-    r90 = _np.array([[C, +S], [-S, C]])
+    r90 = _np.array([[C, -S], [+S, C]])
     for i in range(len(an)):
         u = _np.dot(r90, v[-1])
-        # print(u)
-        n = -u * rho[i]
+        n = u * rho[i]
         o = p[-1] - n;
-        nps = _math.ceil(le[i]/s_step)
-        # print(nps)
-        av = _np.linspace(0, an[i], nps)
+
+        if correct:
+            av = _np.linspace(0, an[i], 1+nps[i])
+        else:
+            nps = _math.ceil(le[i]/s_step)
+            av = _np.linspace(0, an[i], 1+nps)
+            # if i == 0:
+            #     print(le[i], s_step, nps, le[i]/s_step)
+
         v0 = v[-1]
         s0 = s[-1]
         for j in range(1, len(av)):
@@ -1657,8 +1676,9 @@ def gen_trajectory(x0, le, an, s_step, s_max):
             nr = _np.dot(m, n)
             p.append(o + nr)
             v.append(_np.dot(m, v0))
-            # s.append(s0 + av[j] * rho[i])
             s.append(s[-1] + s_step)
+            # print('{:.5f} {:.16f}'.format(s[-1]/1000, abs((180/_math.pi)*_math.asin(v[-1][1]))))
+        # print('* {:.5f} {:.16f}'.format(s[-1]/1000, abs((180/_math.pi)*_math.asin(v[-1][1]))))
     while s[-1] < s_max:
         s.append(s[-1] + s_step)
         v.append(v[-1])
@@ -1693,18 +1713,16 @@ def save_trajectory(folder, dipole_type, s, rx, rz, px, pz):
             f.write(fmts.format(-s[i], rx[i], 0.0, -rz[i], -px[i], 0.0, pz[i]))
 
 
-def save_reference_trajectory(dipole_type):
+def save_reference_trajectory(dipole_type, factor=1, correct=False):
     """."""
     if dipole_type == 'B2':
         x0_folder = 'x0-8p153mm/'
-        trajfname = 'trajectory-b2-pos.in'
     elif dipole_type == 'B1':
         x0_folder = 'x0-8p527mm/'
-        trajfname = 'trajectory-b1-pos.in'
 
     s_rk, rx_rk, rz_rk = calc_average_rk_traj(x0_folder, dipole_type, _plt)
     le, an = calc_average_angles(x0_folder, dipole_type)
-    s, rx, rz, px, pz = gen_trajectory(rx_rk[0], le, an, (s_rk[1]-s_rk[0]), s_rk[-1])
+    s, rx, rz, px, pz = gen_trajectory(rx_rk[0], le, an, (s_rk[1]-s_rk[0])/factor, s_rk[-1], correct=correct)
     save_trajectory(x0_folder, dipole_type, s, rx, rz, px, pz)
 
 
@@ -1728,3 +1746,74 @@ def plot_reference_trajectory(dipole_type):
     _plt.ylabel('X [mm]')
     _plt.legend()
     _plt.show()
+
+
+def load_multipole_error(dipole_type, current, idx):
+    """."""
+
+    def _get_paths(dipole_type, current):
+        if dipole_type == 'B1':
+            folder1 = 'x0-8p527mm/'
+            folder2 = 'x0-8p527mm-reftraj/'
+            b2d = defaults['si-dipoles-b1']
+            magnets = get_magnets_B1()
+            # currents = hall.get_currents_B1()
+        else:
+            folder1 = 'x0-8p153mm/'
+            folder2 = 'x0-8p153mm-reftraj/'
+            b2d = defaults['si-dipoles-b2']
+            magnets = get_magnets_B2()
+            # currents = hall.get_currents_B2()
+
+        ppath = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
+                'analysis/hallprobe/production/'
+        path_base1 = ppath + folder1
+        path_base2 = ppath + folder2
+        return magnets, path_base1, path_base2
+
+    magnets, path_base1, path_base2 = _get_paths(dipole_type, current)
+
+    error1, error2 = [], []
+
+    for magnet in magnets:
+        path1 = path_base1 + magnet + '/' + current.replace('.', 'p') + '/'
+        path2 = path_base2 + magnet + '/' + current.replace('.', 'p') + '/'
+        if dipole_type == 'B1':
+            fname = get_fmap_files_B1(magnet, current)[0]
+            GL_3GeV = 6.4651905682129  # [T]
+            BL_3GeV = - (_math.pi/180) * 2.7553 * 10.006922710777518
+        else:
+            fname = get_fmap_files_B2(magnet, current)[0]
+            GL_3GeV = 9.5945812561879  # [T]
+            BL_3GeV = - (_math.pi/180) * 4.0964 * 10.006922710777518
+        # individual trajectory
+        f = DoubleFMapAnalysis(magnet=magnet, fmap_fname=fname)
+        dataP = f.load_output_trajectory(path1, 'z-positive/')
+        dataN = f.load_output_trajectory(path1, 'z-negative/')
+        # print(magnet, current, dataP['beam_energy'], dataN['beam_energy'])
+        mpoles_normalP, mpoles_skewP, harms = f.load_output_multipoles(path1, 'z-positive/')
+        mpoles_normalN, mpoles_skewN, harms = f.load_output_multipoles(path1, 'z-negative/')
+        mpoles_normal1 = _np.array(mpoles_normalP) + _np.array(mpoles_normalN)
+
+        # mpoles_normal1 = np.array(mpoles_normalN) + np.array(mpoles_normalN)
+
+        # average trajectory
+        f = DoubleFMapAnalysis(magnet=magnet, fmap_fname=fname)
+        dataP = f.load_output_trajectory(path2, 'z-positive/')
+        dataN = f.load_output_trajectory(path2, 'z-negative/')
+        # print(magnet, current, dataP['beam_energy'], dataN['beam_energy'])
+        mpoles_normalP, mpoles_skewP, harms = f.load_output_multipoles(path2, 'z-positive/')
+        mpoles_normalN, mpoles_skewN, harms = f.load_output_multipoles(path2, 'z-negative/')
+        mpoles_normal2 = _np.array(mpoles_normalP) + _np.array(mpoles_normalN)
+        # mpoles_normal2 = np.array(mpoles_normalN) + np.array(mpoles_normalN)
+
+        if idx == 1:
+            ML = GL_3GeV * (dataP['beam_energy']/3.0)
+        elif idx == 0:
+            ML = BL_3GeV * (dataP['beam_energy']/3.0)
+        error1.append(100*(mpoles_normal1[idx]-ML)/ML)
+        error2.append(100*(mpoles_normal2[idx]-ML)/ML)
+
+        print('{} {} {:+.12f} {:+.12f}'.format(magnet, current, error1[-1], error2[-1]))
+
+    return error1, error2

@@ -526,6 +526,8 @@ def create_AT_model(config, segmentation):
     """."""
     s = _np.abs(_np.copy(config.traj.s))
     angle = _np.arcsin(config.traj.px)
+    # for i in range(len(angle)):
+    #     print('{:.5f} {:.16f}'.format(s[i]/1000, (180/math.pi)*abs(angle[i])))
     if config.normalization_is_skew:
         p = _np.copy(config.multipoles.skew_multipoles)
     else:
@@ -552,6 +554,7 @@ def create_AT_model(config, segmentation):
         #     print(seg_m)
         model_multipoles_integral[i, :] = _np.trapz(x=seg_s/1000, y=seg_m)
         model_traj_angle[i] = -_np.interp(x=s2, xp=s, fp=angle)
+        # print(s2, (180/math.pi)*model_traj_angle[i])
     # last segment accumulates the remainder of the integrated multipoles
     s2 = seg_border[-2]
     m2 = _np.zeros((nr_monomials, 1))
@@ -692,7 +695,10 @@ def model_analysis_reftraj(config):
     # adds discrepancy of deflection angle as error in polynomb[0]
     l = _np.array(config.model_segmentation) / 1000.0
     m = config.model_multipoles_integral.transpose() / (-config.beam.brho)
-    a = - config.model_traj_angle * (180.0/_np.pi)
+    if config.traj_rk_s_step > 0.0:
+        a = + config.model_traj_angle * (180.0/_np.pi)
+    else:
+        a = - config.model_traj_angle * (180.0/_np.pi)
 
     # if positive deflection angle, correct field
     # (used for negative TB dipole, for example)
@@ -743,7 +749,7 @@ def model_analysis_reftraj(config):
     angles = []
     for i in range(len(l)):
         tmp_fmt = '{0:' + ang_fmt + '}'
-        angles.append(tmp_fmt.format(a[i]))
+        angles.append(tmp_fmt.format(abs(a[i])))
 
     # generates print-out
     for i in range(len(l)):
