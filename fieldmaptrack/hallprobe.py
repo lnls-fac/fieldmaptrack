@@ -1085,10 +1085,12 @@ def load_analysis_result(folder, dipole_type, plots=None):
         b2d = defaults['si-dipoles-b1']
         magnets = get_magnets_B1()
         currents = get_currents_B1()
+        curr3gev = '403'
     else:
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
+        curr3gev = '401'
 
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
                 'analysis/hallprobe/production/' + folder
@@ -1268,15 +1270,21 @@ def load_analysis_result(folder, dipole_type, plots=None):
         datP = []
         datN = []
         for i in range(len(currents)):
-            v = 1e0*_np.array(data['refrxP'][currents[i]])
-            datP = datP + list(v)
-            _plt.plot(v, s1[i], label=currents[i] + ' P')
-            v = 1e0*_np.array(data['refrxN'][currents[i]])
-            datN = datN + list(v)
-            _plt.plot(v, s2[i], label=currents[i] + ' N')
-        print('average ref rx (pos): ', _np.mean(datP))
-        print('average ref rx (neg): ', _np.mean(datN))
-        print('average ref rx      : ', _np.mean(datN+datP))
+
+            vP = 1e0*_np.array(data['refrxP'][currents[i]])
+            vN = 1e0*_np.array(data['refrxN'][currents[i]])
+            if curr3gev in currents[i]:
+                datP = datP + list(vP)
+                datN = datN + list(vN)
+            else:
+                print('skipped ' + currents[i])
+            _plt.plot(vP, s1[i], label=currents[i] + ' P')
+            _plt.plot(vN, s2[i], label=currents[i] + ' N')
+
+        print('average ref rx (pos): {:.4f} mm'.format(_np.mean(datP)))
+        print('average ref rx (neg): {:.4f} mm'.format(_np.mean(datN)))
+        print('average ref rx      : {:.4f} mm'.format(_np.mean(datN+datP)))
+
         _plt.legend(fontsize=20)
         _plt.grid()
         _plt.xlabel('Magnet Index', fontsize=20)
@@ -1817,3 +1825,126 @@ def load_multipole_error(dipole_type, current, idx):
         print('{} {} {:+.12f} {:+.12f}'.format(magnet, current, error1[-1], error2[-1]))
 
     return error1, error2
+
+
+def load_analysis_file(dipole_type, dipole, current, side):
+    """."""
+    d = dict()
+    if dipole_type == 'B2':
+        fname = '/home/fac_files/lnls-ima/si-dipoles-b2/model-08/analysis/hallprobe/production/x0-8p153mm-reftraj/' + \
+                dipole + '/' + current + '/' + side + '/analysis.txt'
+        d['AN_nominal'] = defaults['si-dipoles-b2']['model_nominal_angle']/2
+    elif dipole_type == 'B1':
+        fname = '/home/fac_files/lnls-ima/si-dipoles-b1/model-09/analysis/hallprobe/production/x0-8p527mm-reftraj/' + \
+                dipole + '/' + current + '/' + side + '/analysis.txt'
+        d['AN_nominal'] = defaults['si-dipoles-b1']['model_nominal_angle']/2
+
+    with open(fname, 'r') as fp:
+        text = fp.readlines()
+
+    harms, nmpoles = [], []
+    for i in range(len(text)):
+        line = text[i]
+        if not line:
+            continue
+        if 'n=' in line and 'len' not in line:
+            words = line.split()
+            n = int(words[0].replace('n=','').replace(':',''))
+            m = float(words[2])
+            harms.append(n)
+            nmpoles.append(m)
+        elif 'beam_energy:' in line:
+            words = line.split()
+            d['energy'] = float(words[1])
+        elif 'len[m]' in line:
+            model = []
+            for j in range(i+1,len(text)):
+                words = text[j].replace(',','').split()
+                m = [float(w) for w in words]
+                model.append(m)
+            d['harms'] = harms
+            d['nmpoles'] = _np.array(nmpoles)
+            d['model'] = _np.array(model)
+            return d
+
+
+def print_average_model(dipole_type, current):
+    """."""
+    print('Checking Magnet models...')
+    models = run_analysis_reftraj_models(dipole_type, current, print_flag=False)
+    model = None
+    for m in models.values():
+        if model is None:
+            model = m
+        else:
+            model += m
+    model /= len(models)
+    print()
+    t = 'Average Dipole Model for ' + dipole_type + ' at current ' + current
+    print(t)
+    print('='*len(t))
+    print('len[m]   angle[deg]  DErr[rad/m]  K[1/m^2]     S[1/m^3]    ...')
+    print()
+    for s in model:
+        print('{:.5f}, {:.8f}, '.format(s[0], s[1]), end='')
+        for v in s[2:]:
+            print('{:+11.4e}, '.format(v), end='')
+        print()
+
+
+def run_analysis_reftraj_models(dipole_type, current, print_flag=True):
+    """."""
+
+    if dipole_type == 'B2':
+        magnets = get_magnets_B2()
+    elif dipole_type == 'B1':
+        magnets = get_magnets_B1()
+
+
+    models = dict()
+    for magnet in magnets:
+        if print_flag:
+            print(magnet)
+        datP = load_analysis_file(dipole_type, magnet, current, 'z-positive')
+        datN = load_analysis_file(dipole_type, magnet, current, 'z-negative')
+        model = datP['model']
+        model[:, 1:] = (datP['model'][:, 1:] + datN['model'][:, 1:])/2
+        nmpoles = (datP['nmpoles'] + datN['nmpoles'])/2
+        energy = datP['energy']
+
+        models[magnet] = model
+
+        brho, *_ = _mp.beam_optics.beam_rigidity(energy=energy)
+
+        # check model x RK
+        for i in range(1, len(nmpoles)):
+            KL_model = sum(model[:,2+i]*model[:,0])
+            GL_model = - brho * KL_model
+            GL_RK = nmpoles[i]
+            GL_diff = 100*(GL_model - GL_RK)/GL_RK
+            strf = '!!! Model <> RK,  ' + 'n={:02d}: {:+.4f} %'.format(i, GL_diff)
+            if abs(GL_diff) > 0.2:
+                print(strf)
+                # raise Exception(strf)
+
+        # check dipole
+        AN_model = sum(model[:, 1])
+        AN_nominal = datP['AN_nominal']
+        BL_model = -brho * (_math.pi/180) * AN_model
+        BL_nominal = -brho * (_math.pi/180) * AN_nominal
+        BL_RK = nmpoles[0]
+        AN_RK = -(180/_math.pi)*BL_RK/brho
+        RKNOM_diff = 100*(AN_RK-AN_nominal)/AN_nominal
+        BL_diff = 100*(BL_model - BL_RK)/BL_RK
+
+        BL_model2 = BL_model - brho * sum(model[:,2]*model[:,0])
+        BL_diff2 = 100*(BL_model2 - BL_RK)/BL_RK
+        if print_flag:
+            print('angle nominal: {:+.16f} deg'.format(AN_nominal))
+            print('angle model  : {:+.16f} deg'.format(AN_model))
+            print('angle RK     : {:+.16f} deg ({:+.5f} %)'.format(AN_RK, RKNOM_diff))
+            print('model (no dip errors)  : {:+.6f} T.m, rk: {:+.6f} T.m, diff: {:+.3f} %'.format(BL_model, BL_RK, BL_diff))
+            print('model (with dip errors): {:+.6f} T.m, rk: {:+.6f} T.m, diff: {:+.3f} %'.format(BL_model2, BL_RK, BL_diff2))
+            print()
+
+    return models
