@@ -15,7 +15,7 @@ from copy import deepcopy as _dcopy
 import mathphys as _mp
 
 
-_path_base = '/home/fac_files/lnls-ima/'
+_path_base = '/home/ima/repo/'
 
 
 defaults = {
@@ -84,7 +84,41 @@ defaults = {
         'skew_multipoles_main_monomials': (),
         'model_segmentation': (2, 3, 5, 5, 5, 10, 40, 150, 100,
                                50, 34, 16, 40, 40, 50), },
+
+    'si-dipoles-bc': {
+        # paths
+        '_path_base': _path_base,
+        '_path_repo': 'si-dipoles-bc/',
+        '_path_model': 'model-13/',
+        '_path_measf': 'measurement/magnetic/hallprobe/',
+        '_path_dataset': '',
+        # rawdata
+        'magnet_type': 'dipole',
+        'config_label': 'BC-analysis',
+        # trajectory
+        'model_nominal_angle': 4.2966,  # [degree]
+        # from spec
+        'model_nominal_KL': -0.6246775537965858,  # [1/m]
+        'traj_init_rx': 0.0,  # [mm]
+        'traj_init_px': 0.0,   # [deg]
+        'traj_rk_s_step': 0.05,  # [mm]
+        'model_nominal_refrx': 7.715119,  # [mm]
+        # multipoles
+        'beam_energy': 3.0,
+        'multipoles_normal_field_fitting_monomials':
+            (0, 1, 2, 3, 4, 5, 6, 7, 8, 10),
+        'multipoles_skew_field_fitting_monomials': (),
+        'multipoles_perpendicular_grid': '_np.linspace(-10,10,41)',
+        'multipoles_r0': 12,  # [mm]
+        'normalization_monomial': 0,
+        'normalization_is_skew': False,
+        'normal_multipoles_main_monomials': (0, 1),
+        'skew_multipoles_main_monomials': (),
+        'model_segmentation':
+            (1, 4, 5, 5, 5, 10, 10, 10, 10, 32,
+             32, 160, 160, 12, 14, 16, 35), },
      }
+
 
 
 class TemplateText:
