@@ -15,7 +15,7 @@ from copy import deepcopy as _dcopy
 import mathphys as _mp
 
 
-_path_base = '/home/ima/repo/'
+_path_base = '/home/imas/repo/'
 
 
 defaults = {
