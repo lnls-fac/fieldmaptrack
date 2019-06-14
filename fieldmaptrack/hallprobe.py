@@ -15,7 +15,7 @@ from copy import deepcopy as _dcopy
 import mathphys as _mp
 
 
-_path_base = '/home/imas/repo/'
+_path_base = '/home/imas/repos/'
 
 
 defaults = {
@@ -584,6 +584,8 @@ class FMapAnalysis(_fmap.common_analysis.Config):
             return defaults['si-dipoles-b2']
         elif 'B1-' in self._magnet:
             return defaults['si-dipoles-b1']
+        elif 'BC-' in self._magnet:
+            return defaults['si-dipoles-bc']
         else:
             raise ValueError('defaults not defined for magnet!!!')
 
@@ -1120,10 +1122,15 @@ def load_analysis_result(folder, dipole_type, plots=None):
         magnets = get_magnets_B1()
         currents = get_currents_B1()
         curr3gev = '403'
-    else:
+    elif dipole_type == 'B1':
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
+        curr3gev = '401'
+    elif dipole_type == 'BC':
+        b2d = defaults['si-dipoles-bc']
+        magnets = get_magnets_BC()
+        currents = get_currents_B()
         curr3gev = '401'
 
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
