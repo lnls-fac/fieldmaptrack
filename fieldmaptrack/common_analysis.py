@@ -368,7 +368,12 @@ def plot_residual_normal_field(config):
         r0 = config.max_r_residual_field/1000
     else:
         r0 = config.multipoles_r0/1000.0
-    x = _np.linspace(0,r0, 60)
+
+    # if fmap is limited we shorten the region where we look at residual fields
+    if r0 + config.traj.rx[0]/1000 >= config.fmap.rx_max/1000:
+        r0 = 0.99*(config.fmap.rx_max/1000 - config.traj.rx[0]/1000)
+    x = _np.linspace(0, r0, 60)
+
 
     # by field reconstructed from fitted polynomials
     dby, by_nominal = 0*x, 0*x
