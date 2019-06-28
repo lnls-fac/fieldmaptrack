@@ -102,7 +102,8 @@ defaults = {
         'traj_init_rx': 0.0,  # [mm]
         'traj_init_px': 0.0,   # [deg]
         'traj_rk_s_step': 0.05,  # [mm]
-        'model_nominal_refrx': 7.715119,  # [mm]
+        # 'model_nominal_refrx': 7.715119,  # [mm]
+        'model_nominal_refrx': 7.7030,  # [mm]
         # multipoles
         'beam_energy': 3.0,
         'multipoles_normal_field_fitting_monomials':
@@ -599,6 +600,8 @@ class FMapAnalysis(_fmap.common_analysis.Config):
             text[i] = text[i].replace('BEAM_ENERGY', str(self.energy))
             text[i] = text[i].replace(
                 'TRAJ_RK_S_STEP', str(self.traj_rk_s_step))
+            text[i] = text[i].replace(
+                'TRAJ_INIT_RX', str(self.traj_init_rx))
             text[i] = text[i].replace(
                 'TRAJ_INIT_PX', str(self.traj_init_px))
             # replace with default attribute values
@@ -1115,6 +1118,47 @@ def get_currents_B1():
     return sorted(currents)
 
 
+def get_fmap_files_BC(magnet=None):
+    """."""
+    global _fmap_files
+
+    if _fmap_files is None:
+        _s = '_Hall_X=-72_12mm_Z=-1500_1500mm_ID='
+        _fmap_files = (
+            '2019-05-21_BC-02' + _s + '1744.dat',
+            '2019-04-05_BC-03' + _s + '1314.dat',
+            '2019-04-24_BC-04' + _s + '1472.dat',
+            '2019-04-10_BC-05' + _s + '1364.dat',
+            '2019-04-25_BC-06' + _s + '1489.dat',
+            '2019-04-11_BC-07' + _s + '1379.dat',
+            '2019-04-26_BC-08' + _s + '1506.dat',
+            '2019-04-12_BC-09' + _s + '1396.dat',
+            '2019-04-30_BC-10' + _s + '1556.dat',
+            '2019-04-20_BC-11' + _s + '1446.dat',
+            '2019-05-02_BC-12' + _s + '1575.dat',
+            '2019-05-05_BC-13' + _s + '1602.dat',
+            '2019-05-07_BC-14' + _s + '1617.dat',
+            '2019-05-08_BC-15' + _s + '1631.dat',
+            '2019-05-10_BC-16' + _s + '1655.dat',
+            '2019-05-13_BC-17' + _s + '1671.dat',
+            '2019-05-14_BC-18' + _s + '1681.dat',  # BC-19 is missing
+            '2019-05-17_BC-20' + _s + '1713.dat',
+            '2019-05-20_BC-21' + _s + '1731.dat',
+        )
+    return _fmap_files
+
+
+def get_magnets_BC():
+    """."""
+    fnames = get_fmap_files_BC()
+    magnets = []
+    for f in fnames:
+        magnet = f[11:11+5]
+        if magnet not in magnets:
+            magnets.append(magnet)
+    return sorted(magnets)
+
+
 def load_analysis_result(folder, dipole_type, plots=None):
     """."""
     if dipole_type == 'B1':
@@ -1130,8 +1174,7 @@ def load_analysis_result(folder, dipole_type, plots=None):
     elif dipole_type == 'BC':
         b2d = defaults['si-dipoles-bc']
         magnets = get_magnets_BC()
-        currents = get_currents_B()
-        curr3gev = '401'
+        currents = []
 
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
                 'analysis/hallprobe/production/' + folder
@@ -1174,7 +1217,7 @@ def load_analysis_result(folder, dipole_type, plots=None):
             path = path_base + magnet + '/' + current.replace('.', 'p') + '/'
             if dipole_type == 'B1':
                 fname = get_fmap_files_B1(magnet, current)[0]
-            else:
+            elif dipole_type == 'B2':
                 fname = get_fmap_files_B2(magnet, current)[0]
             f = DoubleFMapAnalysis(magnet=magnet, fmap_fname=fname)
             dataP = f.load_output_trajectory(path, 'z-positive/')
@@ -1264,6 +1307,7 @@ def load_analysis_result(folder, dipole_type, plots=None):
     # --- angle error ---
     if not plots or 'dangle' in plots:
         dat = []
+        n = 1
         for current in currents:
             v = data['dangle'][current]
             _plt.plot(v, 'o', label=current)
@@ -1442,24 +1486,31 @@ def generate_inputs(c2e, x0, dipole_type='B1'):
     init_rx = float(x0.replace('p','.'))
     if dipole_type == 'B1':
         b2d = defaults['si-dipoles-b1']
-    else:
+    elif dipole_type == 'B2':
         b2d = defaults['si-dipoles-b2']
+    else:
+        b2d = defaults['si-dipoles-bc']
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
                 'analysis/hallprobe/production/' + folder
     if dipole_type == 'B1':
         magnets = get_magnets_B1()
         currents = get_currents_B1()
-    else:
+    elif dipole_type == 'B2':
         magnets = get_magnets_B2()
         currents = get_currents_B2()
+    else:
+        magnets = get_magnets_BC()
+        currents = []
     for magnet in magnets:
         print('creating input files for magnet {}'.format(magnet))
         for curr in currents:
             path = path_base + magnet + '/' + curr.replace('.', 'p') + '/'
             if dipole_type == 'B1':
                 fname = get_fmap_files_B1(magnet, curr)[0]
-            else:
+            elif dipole_type == 'B2':
                 fname = get_fmap_files_B2(magnet, curr)[0]
+            else:
+                fname = get_fmap_files_BC(magnet)
             f = DoubleFMapAnalysis(magnet=magnet, fmap_fname=fname)
             default_s_step = f.get_defaults()['traj_rk_s_step']
             f.energy = c2e[curr]
@@ -1527,11 +1578,18 @@ def calc_average_angles(folder, dipole_type, all_currs=False):
         magnets = get_magnets_B1()
         currents = get_currents_B1()
         curr3gev = '403'
-    else:
+    elif dipole_type == 'B2':
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
         curr3gev = '401'
+    else:
+        b2d = defaults['si-dipoles-bc']
+        magnets = get_magnets_BC()
+        currents = []
+        # currents = get_currents_B2()
+        # curr3gev = '401'
+
 
     # def_angle = b2d['model_nominal_angle']
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
@@ -1601,11 +1659,16 @@ def plot_trajectories(folder, dipole_type):
         magnets = get_magnets_B1()
         currents = get_currents_B1()
         trajfname = 'trajectory-b1-pos.in'
-    else:
+    elif dipole_type == 'B2':
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
         trajfname = 'trajectory-b2-pos.in'
+    elif dipole_type == 'BC':
+        b2d = defaults['si-dipoles-bc']
+        magnets = get_magnets_BC()
+        currents = []
+        trajfname = 'trajectory-bc-pos.in'
 
     # def_angle = b2d['model_nominal_angle']
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
@@ -1651,12 +1714,17 @@ def calc_average_rk_traj(folder, dipole_type, plt=None, all_currs=False):
         currents = get_currents_B1()
         trajfname = 'trajectory-b1-pos.in'
         curr3gev = '403'
-    else:
+    elif dipole_type == 'B2':
         b2d = defaults['si-dipoles-b2']
         magnets = get_magnets_B2()
         currents = get_currents_B2()
         trajfname = 'trajectory-b2-pos.in'
         curr3gev = '401'
+    elif dipole_type == 'BC':
+        b2d = defaults['si-dipoles-bc']
+        magnets = get_magnets_BC()
+        currents = []
+        trajfname = 'trajectory-bc-pos.in'
 
     # def_angle = b2d['model_nominal_angle']
     path_base = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
@@ -1748,6 +1816,10 @@ def save_trajectory(folder, dipole_type, s, rx, rz, px, pz):
     elif dipole_type == 'B2':
         fnameP = 'production/' + folder + 'trajectory-b2-pos.in'
         fnameN = 'production/' + folder + 'trajectory-b2-neg.in'
+    elif dipole_type == 'BC':
+        fnameP = 'production/' + folder + 'trajectory-bc-pos.in'
+        fnameN = 'production/' + folder + 'trajectory-bc-neg.in'
+
 
     with open(fnameP, 'w') as f:
         f.write('# trajectory\n')
@@ -1768,6 +1840,8 @@ def save_reference_trajectory(dipole_type, factor=1, correct=False):
         x0_folder = 'x0-8p153mm/'
     elif dipole_type == 'B1':
         x0_folder = 'x0-8p527mm/'
+    elif dipole_type == 'BC':
+        x0_folder = 'x0-0p079mm/'
 
     s_rk, rx_rk, rz_rk = calc_average_rk_traj(x0_folder, dipole_type, _plt)
     le, an = calc_average_angles(x0_folder, dipole_type)
@@ -1783,6 +1857,9 @@ def plot_reference_trajectory(dipole_type):
     elif dipole_type == 'B1':
         x0_folder = 'x0-8p527mm/'
         trajfname = 'trajectory-b1-pos.in'
+    elif dipole_type == 'BC':
+        x0_folder = 'x0-0p079mm/'
+        trajfname = 'trajectory-bc-pos.in'
     s_rk, rx_rk, rz_rk = calc_average_rk_traj(x0_folder, dipole_type, _plt)
     le, an = calc_average_angles(x0_folder, dipole_type)
     s, rx, rz, px, pz = gen_trajectory(rx_rk[0], le, an, (s_rk[1]-s_rk[0]), s_rk[-1])
@@ -1807,12 +1884,17 @@ def load_multipole_error(dipole_type, current, idx):
             b2d = defaults['si-dipoles-b1']
             magnets = get_magnets_B1()
             # currents = hall.get_currents_B1()
-        else:
+        elif dipole_type == 'B2':
             folder1 = 'x0-8p153mm/'
             folder2 = 'x0-8p153mm-reftraj/'
             b2d = defaults['si-dipoles-b2']
             magnets = get_magnets_B2()
             # currents = hall.get_currents_B2()
+        elif dipole_type == 'BC':
+            folder1 = 'x0-0p079mm/'
+            folder2 = 'x0-0p079mm-reftraj/'
+            b2d = defaults['si-dipoles-bc']
+            magnets = get_magnets_BC()
 
         ppath = b2d['_path_base'] + b2d['_path_repo'] + b2d['_path_model'] + \
                 'analysis/hallprobe/production/'
@@ -1831,10 +1913,14 @@ def load_multipole_error(dipole_type, current, idx):
             fname = get_fmap_files_B1(magnet, current)[0]
             GL_3GeV = 6.4651905682129  # [T]
             BL_3GeV = - (_math.pi/180) * 2.7553 * 10.006922710777518
-        else:
+        elif dipole_type == 'B2':
             fname = get_fmap_files_B2(magnet, current)[0]
             GL_3GeV = 9.5945812561879  # [T]
             BL_3GeV = - (_math.pi/180) * 4.0964 * 10.006922710777518
+        elif dipole_type == 'BC':
+            fname = get_fmap_files_BC(magnet, current)[0]
+            GL_3GeV = 6.2511  # [T]
+            BL_3GeV = - (_math.pi/180) * 4.2966 * 10.006922710777518
         # individual trajectory
         f = DoubleFMapAnalysis(magnet=magnet, fmap_fname=fname)
         dataP = f.load_output_trajectory(path1, 'z-positive/')
@@ -1872,13 +1958,17 @@ def load_analysis_file(dipole_type, dipole, current, side):
     """."""
     d = dict()
     if dipole_type == 'B2':
-        fname = '/home/fac_files/lnls-ima/si-dipoles-b2/model-08/analysis/hallprobe/production/x0-8p153mm-reftraj/' + \
+        fname = '/home/imas/repos/si-dipoles-b2/model-08/analysis/hallprobe/production/x0-8p153mm-reftraj/' + \
                 dipole + '/' + current + '/' + side + '/analysis.txt'
         d['AN_nominal'] = defaults['si-dipoles-b2']['model_nominal_angle']/2
     elif dipole_type == 'B1':
-        fname = '/home/fac_files/lnls-ima/si-dipoles-b1/model-09/analysis/hallprobe/production/x0-8p527mm-reftraj/' + \
+        fname = '/home/imas/repos/si-dipoles-b1/model-09/analysis/hallprobe/production/x0-8p527mm-reftraj/' + \
                 dipole + '/' + current + '/' + side + '/analysis.txt'
         d['AN_nominal'] = defaults['si-dipoles-b1']['model_nominal_angle']/2
+    elif dipole_type == 'BC':
+        fname = '/home/imas/repos/si-dipoles-bc/model-13/analysis/hallprobe/production/x0-0p079mm-reftraj/' + \
+                dipole + '/M1/' + side + '/analysis.txt'
+        d['AN_nominal'] = defaults['si-dipoles-bc']['model_nominal_angle']/2
 
     with open(fname, 'r') as fp:
         text = fp.readlines()
@@ -1912,7 +2002,7 @@ def load_analysis_file(dipole_type, dipole, current, side):
 def print_average_model(dipole_type, current):
     """."""
     print('Checking Magnet models...')
-    models = run_analysis_reftraj_models(dipole_type, current, print_flag=False)
+    models = run_analysis_reftraj_models(dipole_type, current, print_flag=True)
     model = None
     for m in models.values():
         if model is None:
@@ -1926,11 +2016,26 @@ def print_average_model(dipole_type, current):
     print('='*len(t))
     print('len[m]   angle[deg]  DErr[rad/m]  K[1/m^2]     S[1/m^3]    ...')
     print()
+
+    if dipole_type == 'B1':
+        ang_nom = 1.37765
+    elif dipole_type == 'B2':
+        ang_nom = 2.04820
+    elif dipole_type == 'BC':
+        ang_nom = 2.14830
+
+    k = 0
+    s_total = 0
+
     for s in model:
-        print('{:.5f}, {:.8f}, '.format(s[0], s[1]), end='')
+        if k == len(model) - 1:
+           s[1] = ang_nom - s_total
+        print('{:.5f}, {:.5f}, '.format(s[0], s[1]), end='')
         for v in s[2:]:
             print('{:+11.4e}, '.format(v), end='')
         print()
+        k += 1
+        s_total += s[1]
 
 
 def run_analysis_reftraj_models(dipole_type, current, print_flag=True):
@@ -1940,6 +2045,8 @@ def run_analysis_reftraj_models(dipole_type, current, print_flag=True):
         magnets = get_magnets_B2()
     elif dipole_type == 'B1':
         magnets = get_magnets_B1()
+    elif dipole_type == 'BC':
+        magnets = get_magnets_BC()
 
 
     models = dict()
