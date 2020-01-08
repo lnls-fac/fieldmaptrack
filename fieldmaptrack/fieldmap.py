@@ -5,6 +5,9 @@ import numpy as np
 from scipy import interpolate
 
 
+INTERP_KIND = 'cubic'
+
+
 class OutOfRange(Exception):
     """."""
 
@@ -261,7 +264,7 @@ class FieldMap:
         # print('!!!temporary flip of By!!!')
 
         # lookup tables for field interpolation
-        kind = 'cubic'
+        kind = INTERP_KIND
         self.bxf = interpolate.interp2d(self.rx, self.rz, self.bx, kind=kind)
         self.byf = interpolate.interp2d(self.rx, self.rz, self.by, kind=kind)
         self.bzf = interpolate.interp2d(self.rx, self.rz, self.bz, kind=kind)
