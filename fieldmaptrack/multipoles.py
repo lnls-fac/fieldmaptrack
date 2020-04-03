@@ -93,21 +93,28 @@ class Multipoles:
         self.max_fit_error_skew   = (0,0)
         for i in range(len(s)):
             #print(str(i) + '/' + str(len(s)))
-            sf = fieldmaptrack.SerretFrenetCoordSystem(self.trajectory, i)
+            sf = _SerretFrenetCoordSystem(self.trajectory, i)
             points = sf.get_transverse_line(grid)
             fieldmap_field = self.trajectory.fieldmap.interpolate_set(points)
             if is_ref_trajectory_flag:
                 # trajectory is a reference trajectory
                 field = fieldmap_field - _np.tile(reference_field[:,i].reshape((3,1)), (1, len(grid)))
+                self.skew_multipoles[:,i], max_error = self.polyfit(
+                    grid_meter, field[0,:], skew_field_monomials)
                 self.max_fit_error_skew = max_error if max_error[0] > self.max_fit_error_skew[0] else self.max_fit_error_skew
-                self.normal_multipoles[:,i], max_error = mathphys.functions.polyfit(grid_meter, field[1,:], normal_field_monomials)
+                self.normal_multipoles[:,i], max_error = self.polyfit(
+                    grid_meter, field[1,:], normal_field_monomials)
                 self.max_fit_error_normal = max_error if max_error[0] > self.max_fit_error_normal[0] else self.max_fit_error_normal
             else:
                 # trajectory is not a reference trajectory
                 field = fieldmap_field
-                self.skew_multipoles[:,i], max_error = mathphys.functions.polyfit(grid_meter, field[0,:], skew_field_monomials, algorithm='*lstsq')
+                self.skew_multipoles[:,i], max_error = self.polyfit(
+                    grid_meter, field[0,:], skew_field_monomials,
+                    algorithm='*lstsq')
                 self.max_fit_error_skew = max_error if max_error[0] > self.max_fit_error_skew[0] else self.max_fit_error_skew
-                self.normal_multipoles[:,i], max_error = mathphys.functions.polyfit(grid_meter, field[1,:], normal_field_monomials, algorithm='*lstsq')
+                self.normal_multipoles[:,i], max_error = self.polyfit(
+                    grid_meter, field[1,:], normal_field_monomials,
+                    algorithm='*lstsq')
                 self.max_fit_error_normal = max_error if max_error[0] > self.max_fit_error_normal[0] else self.max_fit_error_normal
 
     def calc_multipoles_integrals(self):
