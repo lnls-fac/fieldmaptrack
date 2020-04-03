@@ -1,7 +1,9 @@
-import numpy as np
-import mathphys
-import fieldmaptrack
+"""."""
+import numpy as _np
 
+import mathphys as _mp
+
+from .track import SerretFrenetCoordSystem as _SerretFrenetCoordSystem
 class Multipoles:
 
     def __init__(self,
@@ -72,14 +74,14 @@ class Multipoles:
             raise ValueError
 
         s = self.trajectory.s
-        grid_meter = np.array(grid) * mathphys.units.mm_2_meter
+        grid_meter = _np.array(grid) * _mp.units.mm_2_meter
         normal_field_monomials = list(self.normal_field_fitting_monomials)
         skew_field_monomials   = list(self.skew_field_fitting_monomials)
-        self.normal_multipoles = np.zeros((len(normal_field_monomials), len(s)))
-        self.skew_multipoles   = np.zeros((len(skew_field_monomials), len(s)))
+        self.normal_multipoles = _np.zeros((len(normal_field_monomials), len(s)))
+        self.skew_multipoles   = _np.zeros((len(skew_field_monomials), len(s)))
 
         if is_ref_trajectory_flag:
-            reference_field = np.zeros((3,len(s)))
+            reference_field = _np.zeros((3,len(s)))
             reference_field[0,:] = self.trajectory.bx
             reference_field[1,:] = self.trajectory.by
             reference_field[2,:] = self.trajectory.bz
@@ -96,8 +98,7 @@ class Multipoles:
             fieldmap_field = self.trajectory.fieldmap.interpolate_set(points)
             if is_ref_trajectory_flag:
                 # trajectory is a reference trajectory
-                field = fieldmap_field - np.tile(reference_field[:,i].reshape((3,1)), (1, len(grid)))
-                self.skew_multipoles[:,i], max_error = mathphys.functions.polyfit(grid_meter, field[0,:], skew_field_monomials)
+                field = fieldmap_field - _np.tile(reference_field[:,i].reshape((3,1)), (1, len(grid)))
                 self.max_fit_error_skew = max_error if max_error[0] > self.max_fit_error_skew[0] else self.max_fit_error_skew
                 self.normal_multipoles[:,i], max_error = mathphys.functions.polyfit(grid_meter, field[1,:], normal_field_monomials)
                 self.max_fit_error_normal = max_error if max_error[0] > self.max_fit_error_normal[0] else self.max_fit_error_normal
@@ -111,34 +112,34 @@ class Multipoles:
 
     def calc_multipoles_integrals(self):
         normal_field_monomials = self.normal_field_fitting_monomials
-        self.normal_multipoles_integral = np.zeros(self.normal_multipoles.shape[0])
-        x = self.trajectory.s * mathphys.units.mm_2_meter
+        self.normal_multipoles_integral = _np.zeros(self.normal_multipoles.shape[0])
+        x = self.trajectory.s * _mp.units.mm_2_meter
         # if RK integration was done ds < 0, we need to invert integration sign
         sign = +1.0 if self.trajectory.s[-1] > self.trajectory.s[0] else -1.0
         for i in range(len(normal_field_monomials)):
             yb = self.normal_multipoles[i,:]
-            self.normal_multipoles_integral[i] = sign * np.trapz(y = yb, x = x)
+            self.normal_multipoles_integral[i] = sign * _np.trapz(y = yb, x = x)
         skew_field_monomials = self.skew_field_fitting_monomials
-        self.skew_multipoles_integral = np.zeros(self.skew_multipoles.shape[0])
-        x = self.trajectory.s * mathphys.units.mm_2_meter
+        self.skew_multipoles_integral = _np.zeros(self.skew_multipoles.shape[0])
+        x = self.trajectory.s * _mp.units.mm_2_meter
         for i in range(len(skew_field_monomials)):
             ya = self.skew_multipoles[i,:]
-            self.skew_multipoles_integral[i] = sign * np.trapz(y = ya, x = x)
+            self.skew_multipoles_integral[i] = sign * _np.trapz(y = ya, x = x)
 
     def calc_multipoles_integrals_relative(self, main_polynom, main_monomial, r0, is_skew = False):
 
         self.r0 = r0
         self.main_monomial = main_monomial
         self.main_monomial_is_skew = is_skew
-        r0 = self.r0 * mathphys.units.mm_2_meter
+        r0 = self.r0 * _mp.units.mm_2_meter
         if is_skew:
             main_idx = list(self.skew_field_fitting_monomials).index(main_monomial)
             main_multipole = main_polynom[main_idx] * r0 ** main_monomial
         else:
             main_idx = list(self.normal_field_fitting_monomials).index(main_monomial)
             main_multipole = main_polynom[main_idx] * r0 ** main_monomial
-        self.skew_multipoles_integral_relative = np.zeros(self.skew_multipoles_integral.shape)
-        self.normal_multipoles_integral_relative = np.zeros(self.normal_multipoles_integral.shape)
+        self.skew_multipoles_integral_relative = _np.zeros(self.skew_multipoles_integral.shape)
+        self.normal_multipoles_integral_relative = _np.zeros(self.normal_multipoles_integral.shape)
         for i in range(len(self.normal_field_fitting_monomials)):
             n = self.normal_field_fitting_monomials[i]
             self.normal_multipoles_integral_relative[i] = self.normal_multipoles_integral[i] * (r0 ** n) / main_multipole
@@ -172,16 +173,16 @@ class Multipoles:
             n = all_monomials[i]
             try:
                 idx = normal_field_monomials.index(all_monomials[i])
-                #max_poly_b   = '{0:^13.4e}'.format(max(np.abs(self.normal_multipoles[idx,:])))
-                max_poly_b   = '{0:^13.4e}'.format(np.abs(self.normal_multipoles[idx,0]))
+                #max_poly_b   = '{0:^13.4e}'.format(max(_np.abs(self.normal_multipoles[idx,:])))
+                max_poly_b   = '{0:^13.4e}'.format(_np.abs(self.normal_multipoles[idx,0]))
                 integ_poly_b = '{0:^+13.4e}'.format(self.normal_multipoles_integral[idx])
                 integ_poly_b_relative = '{0:^+13.4e}'.format(self.normal_multipoles_integral_relative[idx])
             except ValueError:
                 max_poly_b, integ_poly_b, integ_poly_b_relative = '---','---','---'
             try:
                 idx = skew_field_monomials.index(all_monomials[i])
-                #max_poly_a   = '{0:^13.4e}'.format(max(np.abs(self.skew_multipoles[idx,:])))
-                max_poly_a   = '{0:^13.4e}'.format(np.abs(self.skew_multipoles[idx,0]))
+                #max_poly_a   = '{0:^13.4e}'.format(max(_np.abs(self.skew_multipoles[idx,:])))
+                max_poly_a   = '{0:^13.4e}'.format(_np.abs(self.skew_multipoles[idx,0]))
                 integ_poly_a = '{0:^+13.4e}'.format(self.skew_multipoles_integral[idx])
                 integ_poly_a_relative = '{0:^+13.4e}'.format(self.skew_multipoles_integral_relative[idx])
             except ValueError:
@@ -189,7 +190,6 @@ class Multipoles:
             r += '\n{0:<35s} {1:^13s} {2:^13s} {5:^13s} | {3:^13s} {4:^13s} {6:^13s}'.format('n={0:02d}:'.format(n), max_poly_b, integ_poly_b, max_poly_a, integ_poly_a, integ_poly_b_relative, integ_poly_a_relative)
 
         return r
-
 
     def save(self, filename, is_skew=False):
 
