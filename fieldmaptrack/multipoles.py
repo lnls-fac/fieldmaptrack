@@ -4,6 +4,10 @@ import numpy as _np
 import mathphys as _mp
 
 from .track import SerretFrenetCoordSystem as _SerretFrenetCoordSystem
+
+# TODO: Fix style of this module. Pylint is going crazy with it :)
+
+
 class Multipoles:
 
     def __init__(self,
