@@ -230,7 +230,14 @@ class FieldMap:
         self.rz_step = (self.rz_max - self.rz_min) / (self.rz_nrpts - 1.0) \
             if self.rz_nrpts > 1 else 0.0
         self.rx_zero = np.where(self.rx == 0)[0][0]
-        self.ry_zero = np.where(self.ry == 0)[0][0]
+        try:
+            self.ry_zero = np.where(self.ry == 0)[0][0]
+        except IndexError:
+            print('data set does not contain y=0 !')
+            self.ry_zero = 0
+            for i in range(len(self.ry)):
+                if abs(self.ry[i]) < abs(self.ry[self.ry_zero]):
+                    self.ry_zero = i
         try:
             self.rz_zero = np.where(self.rz == 0)[0][0]
         except IndexError:
