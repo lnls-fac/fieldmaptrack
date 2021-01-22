@@ -5,6 +5,9 @@ import numpy as np
 from scipy import interpolate
 
 
+INTERP_KIND = 'cubic'
+
+
 class OutOfRange(Exception):
     """."""
 
@@ -227,15 +230,12 @@ class FieldMap:
         self.rz_step = (self.rz_max - self.rz_min) / (self.rz_nrpts - 1.0) \
             if self.rz_nrpts > 1 else 0.0
         self.rx_zero = np.where(self.rx == 0)[0][0]
-        self.ry_zero = np.where(self.ry == 0)[0][0]
-        try:
-            self.rz_zero = np.where(self.rz == 0)[0][0]
-        except IndexError:
+        self.ry_zero = np.argmin(np.abs(np.asarray(self.ry)))
+        if self.ry[self.ry_zero] != 0.0:
+            print('data set does not contain y=0 !')
+        self.rz_zero = np.argmin(np.abs(np.asarray(self.rz)))
+        if self.rz[self.rz_zero] != 0.0:
             print('data set does not contain z=0 !')
-            self.rz_zero = 0
-            for i in range(len(self.rz)):
-                if abs(self.rz[i]) < abs(self.rz[self.rz_zero]):
-                    self.rz_zero = i
 
         # field data
         self.bx, self.by, self.bz = \
@@ -261,7 +261,7 @@ class FieldMap:
         # print('!!!temporary flip of By!!!')
 
         # lookup tables for field interpolation
-        kind = 'cubic'
+        kind = INTERP_KIND
         self.bxf = interpolate.interp2d(self.rx, self.rz, self.bx, kind=kind)
         self.byf = interpolate.interp2d(self.rx, self.rz, self.by, kind=kind)
         self.bzf = interpolate.interp2d(self.rx, self.rz, self.bz, kind=kind)

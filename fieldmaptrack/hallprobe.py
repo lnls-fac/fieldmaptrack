@@ -37,9 +37,10 @@ defaults = {
         'model_nominal_angle': 4.0964,  # [degree]
         'model_nominal_KL': -0.95879438,  # from AT model
         # 'model_nominal_KL': -0.96018,  # from wiki spec
-        'traj_init_rx': 8.153,  # [mm]
+        # 'traj_init_rx': 8.153,  # [mm]
+        'traj_init_rx': 8.250,  # [mm]
         'traj_init_px': 0.0,   # [deg]
-        'traj_rk_s_step': 0.1,  # [mm]
+        'traj_rk_s_step': 0.05,  # [mm]
         'model_nominal_refrx': 19.428,  # [mm]
         # multipoles
         'beam_energy': 3.0,
@@ -68,7 +69,8 @@ defaults = {
         'model_nominal_angle': 2.7553,  # [degree]
         # 'model_nominal_KL': -0.64400437024,  # from AT model (0.32% menor)
         'model_nominal_KL': -0.6460718,  # from AT model - dipole model 09
-        'traj_init_rx': 8.527,  # [mm]
+        # 'traj_init_rx': 8.527,  # [mm]
+        'traj_init_rx': 8.615,  # [mm]
         'traj_init_px': 0.0,   # [deg]
         'traj_rk_s_step': 0.05,  # [mm]
         'model_nominal_refrx': 13.689,  # [mm]
@@ -1383,12 +1385,14 @@ def search_for_deflection_angle(dipole_type):
         init_energies = [2.840677756097561, 2.987685682926829, 3.0008746829268294, 3.134536902439024]
         magnets = get_magnets_B1()
         currents = get_currents_B1()
-        init_rx = 8.285 + 0.313
+        # init_rx = 8.285 + 0.313
+        init_rx = 8.615
     else:
         init_energies = [2.8426315121951222 , 2.990131219512195, 3.0131593524884295, 3.137303658536585]
         magnets = get_magnets_B2()
         currents = get_currents_B2()
-        init_rx = 7.920 + 0.245 - 0.012
+        # init_rx = 7.920 + 0.245 - 0.012
+        init_rx = 8.250
 
     fstr = 'magnet:{}, current:{} => nr_iter:{:02d}, energy:{:8.6f} GeV'
     for i in range(len(currents)):
