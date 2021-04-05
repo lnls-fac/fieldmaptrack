@@ -42,6 +42,9 @@ def get_analysis_symbol(magnet_type):
     if magnet_type == 'corrector':
         import fieldmaptrack.corrector_analysis as corrector_analysis
         return corrector_analysis
+    if magnet_type == 'insertion-device':
+        import fieldmaptrack.id_analysis as id_analysis
+        return id_analysis
 
 
 def raw_fieldmap_analysis(config):
