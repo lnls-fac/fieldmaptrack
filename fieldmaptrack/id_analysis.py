@@ -1,4 +1,4 @@
-"""Dipole Analysis."""
+"""Insertion Device Analysis."""
 
 import math as _math
 import numpy as _np
