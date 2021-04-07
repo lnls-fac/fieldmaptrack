@@ -7,6 +7,7 @@ from .track import SerretFrenetCoordSystem
 from .track import Trajectory
 from .track import TrackException
 from .multipoles import Multipoles
+from .idkickmap import IDKickMap
 
 from . import common_analysis
 

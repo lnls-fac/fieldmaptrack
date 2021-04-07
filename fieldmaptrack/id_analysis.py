@@ -40,6 +40,10 @@ def calc_trajectory(config):
         init_rx = config.traj_init_rx
     else:
         init_rx = 0.0
+    if hasattr(config, 'traj_init_ry'):
+        init_ry = config.traj_init_ry
+    else:
+        config.traj_init_ry = init_ry = 0.0
     if hasattr(config, 'traj_init_rz'):
         init_rz = config.traj_init_rz
     else:
@@ -48,8 +52,10 @@ def calc_trajectory(config):
         init_px = config.traj_init_px * (_math.pi/180.0)
     else:
         config.traj_init_px = init_px = 0.0
-    init_ry = 0.0
-    init_py = 0.0
+    if hasattr(config, 'traj_init_py'):
+        init_py = config.traj_init_py * (_math.pi/180.0)
+    else:
+        config.traj_init_py = init_py = 0.0
     init_pz = _math.sqrt(1.0 - init_px**2 - init_py**2)
     if config.traj_rk_s_step > 0.0:
         rk_min_rz = max(config.fmap.rz)
@@ -72,14 +78,12 @@ def trajectory_analysis(config):
     """Trajectory analysis."""
     if config.traj_load_filename is not None:
         # loads trajectory from file
-        half_dipole_length = config.fmap.length / 2.0
         config.beam = fieldmaptrack.Beam(energy=config.beam_energy)
         config.traj = fieldmaptrack.Trajectory(
             beam=config.beam,
             fieldmap=config.fmap,
             not_raise_range_exceptions=config.not_raise_range_exceptions)
         config.traj.load(config.traj_load_filename)
-        config.traj_sagitta = config.traj.calc_sagitta(half_dipole_length)
         config.traj_init_rz = config.traj.rz[0]
     else:
         config.beam = fieldmaptrack.Beam(energy=config.beam_energy)

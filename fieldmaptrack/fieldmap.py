@@ -419,24 +419,42 @@ class FieldMap:
         rz = -S * (rx_global - self.translation[0]) + \
             C * (rz_global - self.translation[1])
 
+        if not self.interp3d:
+            if rx < self.rx_min:
+                rstr = ('Rx extrapolation rx = {0:f} < rx_min = '
+                        '{1:f} [mm]').format(rx, self.rx_min)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRxMin(rstr)
+                return (0, 0, 0)
 
-        if rx < self.rx_min:
-            rstr = ('Rx extrapolation rx = {0:f} < rx_min = '
-                    '{1:f} [mm]').format(rx, self.rx_min)
-            if self.not_raise_range_exceptions:
-                print(rstr)
-            else:
-                raise OutOfRangeRxMin(rstr)
-            return (0, 0, 0)
+            if rx > self.rx_max:
+                rstr = ('Rx extrapolation rx = {0:f} > rx_max = '
+                        '{1:f} [mm]').format(rx, self.rx_max)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRxMax(rstr)
+                return (0, 0, 0)
 
-        if rx > self.rx_max:
-            rstr = ('Rx extrapolation rx = {0:f} > rx_max = '
-                    '{1:f} [mm]').format(rx, self.rx_max)
-            if self.not_raise_range_exceptions:
-                print(rstr)
-            else:
-                raise OutOfRangeRxMax(rstr)
-            return (0, 0, 0)
+            if ry < self.ry_min:
+                rstr = ('Ry extrapolation ry = {0:f} < ry_min = '
+                        '{1:f} [mm]').format(ry, self.ry_min)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRyMin(rstr)
+                return (0, 0, 0)
+
+            if ry > self.ry_max:
+                rstr = ('Ry extrapolation ry = {0:f} > ry_max = '
+                        '{1:f} [mm]').format(ry, self.ry_max)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRyMax(rstr)
+                return (0, 0, 0)
 
         if rz > self.rz_max:
             rstr = ('Rz extrapolation rz = {0:f} > rz_max = '
@@ -450,6 +468,10 @@ class FieldMap:
         if not self.interp3d:
             field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
         else:
+            rx = max(rx, self.rx_min)
+            rx = min(rx, self.rx_max)
+            ry = max(ry, self.ry_min)
+            ry = min(ry, self.ry_max)
             field = (self.bxf((ry, rx, rz)), self.byf((ry, rx, rz)), self.bzf((ry, rx, rz)))
 
         # converts field back to global coordinates
