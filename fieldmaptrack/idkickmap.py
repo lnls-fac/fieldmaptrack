@@ -37,8 +37,8 @@ class IDKickMap:
 
     def fmap_calc_kickmap(self, fmap_fname, posx, posy, beam_energy=3.0, rk_s_step=0.2):
         """."""
-        self.posx = _np.array(posx)
-        self.posy = _np.array(posy)
+        self.posx = _np.array(posx) # [m]
+        self.posy = _np.array(posy) # [m]
         self.fmap_config = \
             IDKickMap._create_fmap_config(fmap_fname, beam_energy=beam_energy, rk_s_step=rk_s_step)
     
