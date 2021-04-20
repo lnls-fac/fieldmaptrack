@@ -90,7 +90,7 @@ class IDKickMap:
         for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.kickx[i, j])
+                rst += '{:+11.4e} '.format(self.kickx[-i-1, j])
 
         rst += '\n# Total Vertical 2nd Order Kick [T2m2]'
         rst += '\nSTART'
@@ -102,7 +102,7 @@ class IDKickMap:
         for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.kicky[i, j])
+                rst += '{:+11.4e} '.format(self.kicky[-i-1, j])
 
         rst += '\n# Horizontal Final Position [m]'
         rst += '\nSTART'
@@ -114,7 +114,7 @@ class IDKickMap:
         for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.fposx[i, j])
+                rst += '{:+11.4e} '.format(self.fposx[-i-1, j])
 
         rst += '\n# Vertical Final Position [m]'
         rst += '\nSTART'
@@ -126,7 +126,7 @@ class IDKickMap:
         for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.fposy[i, j])
+                rst += '{:+11.4e} '.format(self.fposy[-i-1, j])
 
         return rst
 
