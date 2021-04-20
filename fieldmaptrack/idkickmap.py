@@ -11,7 +11,6 @@ from .track import Trajectory as _Trajectory
 
 class IDKickMap:
     """."""
-
     def __init__(self, fname=None):
         """."""
         self.id_length = None  # [m]
@@ -166,6 +165,12 @@ class IDKickMap:
         kicky = tables[1*nrpts_y:2*nrpts_y, :]
         fposx = tables[2*nrpts_y:3*nrpts_y, :]
         fposy = tables[3*nrpts_y:4*nrpts_y, :]
+        if posy[-1] < posy[0]:
+            posy = posy[::-1]
+            kickx = kickx[::-1, :]
+            kicky = kicky[::-1, :]
+            fposx = fposx[::-1, :]
+            fposy = fposy[::-1, :]
 
         return id_length, posx, posy, kickx, kicky, fposx, fposy
 
