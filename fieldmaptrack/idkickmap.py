@@ -87,7 +87,7 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
                 rst += '{:+11.4e} '.format(self.kickx[i, j])
@@ -99,7 +99,7 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
                 rst += '{:+11.4e} '.format(self.kicky[i, j])
@@ -111,7 +111,7 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
                 rst += '{:+11.4e} '.format(self.fposx[i, j])
@@ -123,7 +123,7 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
                 rst += '{:+11.4e} '.format(self.fposy[i, j])
