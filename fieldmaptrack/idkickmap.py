@@ -11,7 +11,6 @@ from .track import Trajectory as _Trajectory
 
 class IDKickMap:
     """."""
-
     def __init__(self, fname=None):
         """."""
         self.id_length = None  # [m]
@@ -88,10 +87,10 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.kickx[i, j])
+                rst += '{:+11.4e} '.format(self.kickx[-i-1, j])
 
         rst += '\n# Total Vertical 2nd Order Kick [T2m2]'
         rst += '\nSTART'
@@ -100,10 +99,10 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.kicky[i, j])
+                rst += '{:+11.4e} '.format(self.kicky[-i-1, j])
 
         rst += '\n# Horizontal Final Position [m]'
         rst += '\nSTART'
@@ -112,10 +111,10 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.fposx[i, j])
+                rst += '{:+11.4e} '.format(self.fposx[-i-1, j])
 
         rst += '\n# Vertical Final Position [m]'
         rst += '\nSTART'
@@ -124,10 +123,10 @@ class IDKickMap:
         for rxi in self.posx:
             rst += '{:+011.5f} '.format(rxi)
         # table
-        for i, ryi in enumerate(self.posy):
+        for i, ryi in enumerate(self.posy[::-1]):
             rst += '\n{:+011.5f} '.format(ryi)
             for j, rxi in enumerate(self.posx):
-                rst += '{:+11.4e} '.format(self.fposy[i, j])
+                rst += '{:+11.4e} '.format(self.fposy[-i-1, j])
 
         return rst
 
@@ -166,6 +165,12 @@ class IDKickMap:
         kicky = tables[1*nrpts_y:2*nrpts_y, :]
         fposx = tables[2*nrpts_y:3*nrpts_y, :]
         fposy = tables[3*nrpts_y:4*nrpts_y, :]
+        if posy[-1] < posy[0]:
+            posy = posy[::-1]
+            kickx = kickx[::-1, :]
+            kicky = kicky[::-1, :]
+            fposx = fposx[::-1, :]
+            fposy = fposy[::-1, :]
 
         return id_length, posx, posy, kickx, kicky, fposx, fposy
 
