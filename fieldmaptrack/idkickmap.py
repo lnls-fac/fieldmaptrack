@@ -21,7 +21,7 @@ class IDKickMap:
         self.fposx = None  # [m]
         self.fposy = None  # [m]
         self.fmap_config = None
-        self.author = '# Author: FAC script' if author is None else author
+        self.author = '# Author: FAC fieldmaptrack.IDKickMap' if author is None else author
 
         # load
         if fname:
