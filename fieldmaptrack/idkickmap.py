@@ -11,7 +11,7 @@ from .track import Trajectory as _Trajectory
 
 class IDKickMap:
     """."""
-    def __init__(self, fname=None):
+    def __init__(self, fname=None, author=None):
         """."""
         self.id_length = None  # [m]
         self.posx = None  # [m]
@@ -21,7 +21,8 @@ class IDKickMap:
         self.fposx = None  # [m]
         self.fposy = None  # [m]
         self.fmap_config = None
-        
+        self.author = '# Author: FAC fieldmaptrack.IDKickMap' if author is None else author
+
         # load
         if fname:
             self.load(fname)
@@ -71,7 +72,7 @@ class IDKickMap:
 
         rst = ''
         # header
-        rst += '# Author: FAC script'
+        rst += self.author
         rst += '\n# '
         rst += '\n# Total Length of Longitudinal Interval [m]'
         rst += '\n{}'.format(self.id_length)
