@@ -131,7 +131,8 @@ class FieldMap:
                  rotation=0.0,
                  translation=(0, 0),
                  transforms=None,
-                 not_raise_range_exceptions=False):
+                 not_raise_range_exceptions=False,
+                 interp3d_2dp1d=False):
         """Init method."""
         self.filename = fname
         self.fieldmap_label = None
@@ -140,6 +141,7 @@ class FieldMap:
         self.translation = translation
         self.transforms = dict() if transforms is None else transforms
         self.not_raise_range_exceptions = not_raise_range_exceptions
+        self.interp3d_2dp1d = interp3d_2dp1d
 
         # unique and sorted 1D numpy arrays with values of
         # corresponding coordinates:
@@ -215,6 +217,7 @@ class FieldMap:
         self.rx = np.unique(data[:, 0])
         self.ry = np.unique(data[:, 1])
         self.rz = np.unique(data[:, 2])
+
         self.rx_min, self.rx_max, self.rx_nrpts = \
             min(self.rx), max(self.rx), len(self.rx)
         self.ry_min, self.ry_max, self.ry_nrpts = \
@@ -239,9 +242,16 @@ class FieldMap:
 
         # field data
         self.bx, self.by, self.bz = \
-            data[:, 3].view(), data[:, 4].view(), data[:, 5].view()
-        self.bx.shape, self.by.shape, self.bz.shape = \
-            (-1, self.rx_nrpts), (-1, self.rx_nrpts), (-1, self.rx_nrpts)
+                data[:, 3].view(), data[:, 4].view(), data[:, 5].view()
+
+        if len(self.ry) == 1:
+            self.bx.shape, self.by.shape, self.bz.shape = \
+                (-1, self.rx_nrpts), (-1, self.rx_nrpts), (-1, self.rx_nrpts)
+        else:
+            self.bx.shape, self.by.shape, self.bz.shape = \
+                (self.rz_nrpts, self.ry_nrpts, self.rx_nrpts), \
+                (self.rz_nrpts, self.ry_nrpts, self.rx_nrpts), \
+                (self.rz_nrpts, self.ry_nrpts, self.rx_nrpts)
 
         # post-apply transformations
         if 'roty180' in self.transforms:
@@ -261,14 +271,43 @@ class FieldMap:
         # print('!!!temporary flip of By!!!')
 
         # lookup tables for field interpolation
-        kind = INTERP_KIND
-        self.bxf = interpolate.interp2d(self.rx, self.rz, self.bx, kind=kind)
-        self.byf = interpolate.interp2d(self.rx, self.rz, self.by, kind=kind)
-        self.bzf = interpolate.interp2d(self.rx, self.rz, self.bz, kind=kind)
-
-        self.bx = [np.transpose(self.bx)]
-        self.by = [np.transpose(self.by)]
-        self.bz = [np.transpose(self.bz)]
+        if len(self.ry) == 1:
+            self.interp3d = False
+            self.interp3d_2dp1d = False
+            kind = INTERP_KIND
+            self.bxf = interpolate.interp2d(self.rx, self.rz, self.bx, kind=kind)
+            self.byf = interpolate.interp2d(self.rx, self.rz, self.by, kind=kind)
+            self.bzf = interpolate.interp2d(self.rx, self.rz, self.bz, kind=kind)
+            self.bx = [np.transpose(self.bx)]
+            self.by = [np.transpose(self.by)]
+            self.bz = [np.transpose(self.bz)]
+            # self.bx = np.array(self.bx)
+            # self.by = np.array(self.by)
+            # self.bz = np.array(self.bz)
+        else:
+            self.interp3d = True
+            if not self.interp3d_2dp1d:
+                # 3D linear
+                self.bx = np.transpose(self.bx, (1, 2, 0))
+                self.by = np.transpose(self.by, (1, 2, 0))
+                self.bz = np.transpose(self.bz, (1, 2, 0))
+                rgrid = interpolate.RegularGridInterpolator
+                self.bxf = rgrid((self.ry, self.rx, self.rz), self.bx)
+                self.byf = rgrid((self.ry, self.rx, self.rz), self.by)
+                self.bzf = rgrid((self.ry, self.rx, self.rz), self.bz)
+            else:
+                # 2D+1D cubic
+                self.bx = np.transpose(self.bx, (1, 0, 2))
+                self.by = np.transpose(self.by, (1, 0, 2))
+                self.bz = np.transpose(self.bz, (1, 0, 2))
+                self.bxf = [None for _ in range(len(self.ry))]
+                self.byf = [None for _ in range(len(self.ry))]
+                self.bzf = [None for _ in range(len(self.ry))]
+                kind = INTERP_KIND
+                for i in range(len(self.ry)):
+                    self.bxf[i] = interpolate.interp2d(self.rx, self.rz, self.bx[i], kind=kind)
+                    self.byf[i] = interpolate.interp2d(self.rx, self.rz, self.by[i], kind=kind)
+                    self.bzf[i] = interpolate.interp2d(self.rx, self.rz, self.bz[i], kind=kind)
 
         ''' header section '''
         lines = content[:idx].split('\n')
@@ -394,37 +433,76 @@ class FieldMap:
         C, S = math.cos(self.rotation), math.sin(self.rotation)
         rx = C * (rx_global - self.translation[0]) + \
             S * (rz_global - self.translation[1])
-        # ry = ry_global
+        ry = ry_global
         rz = -S * (rx_global - self.translation[0]) + \
             C * (rz_global - self.translation[1])
 
-        # if rx < min_rx:
-        #     min_rx = rx
-        #     print(min_rx)
-        #
-        # if rx > max_rx:
-        #     max_rx = rx
-        #     print(max_rx)
+        if not self.interp3d or self.interp3d_2dp1d:
+            if rx < self.rx_min:
+                rstr = ('Rx extrapolation rx = {0:f} < rx_min = '
+                        '{1:f} [mm]').format(rx, self.rx_min)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRxMin(rstr)
+                return (0, 0, 0)
 
-        if rx < self.rx_min:
-            rstr = ('Rx extrapolation rx = {0:f} < rx_min = '
-                    '{1:f} [mm]').format(rx, self.rx_min)
+            if rx > self.rx_max:
+                rstr = ('Rx extrapolation rx = {0:f} > rx_max = '
+                        '{1:f} [mm]').format(rx, self.rx_max)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRxMax(rstr)
+                return (0, 0, 0)
+
+            if ry < self.ry_min:
+                rstr = ('Ry extrapolation ry = {0:f} < ry_min = '
+                        '{1:f} [mm]').format(ry, self.ry_min)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRyMin(rstr)
+                return (0, 0, 0)
+
+            if ry > self.ry_max:
+                rstr = ('Ry extrapolation ry = {0:f} > ry_max = '
+                        '{1:f} [mm]').format(ry, self.ry_max)
+                if self.not_raise_range_exceptions:
+                    print(rstr)
+                else:
+                    raise OutOfRangeRyMax(rstr)
+                return (0, 0, 0)
+
+        if rz > self.rz_max:
+            rstr = ('Rz extrapolation rz = {0:f} > rz_max = '
+                    '{1:f} [mm]').format(rz, self.rz_max)
             if self.not_raise_range_exceptions:
                 print(rstr)
             else:
-                raise OutOfRangeRxMin(rstr)
+                raise OutOfRangeRzMax(rstr)
             return (0, 0, 0)
 
-        if rx > self.rx_max:
-            rstr = ('Rx extrapolation rx = {0:f} > rx_max = '
-                    '{1:f} [mm]').format(rx, self.rx_max)
-            if self.not_raise_range_exceptions:
-                print(rstr)
+        if not self.interp3d:
+            field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
+        else:
+            if not self.interp3d_2dp1d:
+                rx = max(rx, self.rx_min)
+                rx = min(rx, self.rx_max)
+                ry = max(ry, self.ry_min)
+                ry = min(ry, self.ry_max)
+                field = (self.bxf((ry, rx, rz)), self.byf((ry, rx, rz)), self.bzf((ry, rx, rz)))
             else:
-                raise OutOfRangeRxMax(rstr)
-            return (0, 0, 0)
-
-        field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
+                vbx, vby, vbz = 0 * self.ry, 0 * self.ry, 0 * self.ry
+                for i in range(len(vbx)):
+                    vbx[i] = self.bxf[i](rx, rz)
+                    vby[i] = self.byf[i](rx, rz)
+                    vbz[i] = self.bzf[i](rx, rz)
+                kind = INTERP_KIND
+                fbx = interpolate.interp1d(self.ry, vbx, kind=kind)
+                fby = interpolate.interp1d(self.ry, vby, kind=kind)
+                fbz = interpolate.interp1d(self.ry, vbz, kind=kind)
+                field = (fbx(ry), fby(ry), fbz(ry))
 
         # converts field back to global coordinates
         bx = C * field[0] - S * field[2]
