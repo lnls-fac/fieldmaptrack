@@ -199,6 +199,14 @@ class Trajectory:
                 else:
                     s_nrpts = 1 + int(s_length / s_step)
 
+        if 'kicks' in kwargs:
+            kicks_rz = kwargs['kicks'][0]
+            kicks_hkicks = kwargs['kicks'][1]
+            kicks_vkicks = kwargs['kicks'][2]
+            kicks_idx = 0
+        else:
+            kicks_idx = -1  # no kicks
+
         # inits auxiliary data structures
         self.s_step = s_step
         self.force_midplane = force_midplane
@@ -215,6 +223,13 @@ class Trajectory:
         rx, ry, rz = init_rx, init_ry, init_rz
         px, py, pz = init_px, init_py, init_pz
         while True:
+
+            # insert kicks if available
+            if kicks_idx >= 0:
+                if kicks_idx < len(kicks_rz) and rz >= kicks_rz[kicks_idx]:
+                    px += kicks_hkicks[kicks_idx]
+                    py += kicks_vkicks[kicks_idx]
+                    kicks_idx += 1
 
             # forces midplane, if the case
             if self.force_midplane:
