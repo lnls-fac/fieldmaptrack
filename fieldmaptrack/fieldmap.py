@@ -155,11 +155,16 @@ class FieldMap:
         # spacing between consecutive coordinate values:
         self.rx_step, self.step, self.rz_step = None, None, None
 
-        options = {self.field_function, self.filename, content}
-        if len(options) == 1 and None in options:
-            raise IrregularFieldMap('source of field not defined!')
-        if len(options) > 2 or None not in options:
-            raise IrregularFieldMap('two sources of field defined!')
+        if content is None:
+            if self.field_function is None and self.filename is None:
+                raise IrregularFieldMap('source of field not defined!')
+            if self.field_function is not None and self.filename is not None:
+                raise IrregularFieldMap(
+                    'more than one source of field defined!')
+        else:
+            if self.field_function is not None or self.filename is not None:
+                raise IrregularFieldMap(
+                    'more than one source of field defined!')
 
         # bx, by and bz field components of the fieldmap
         # ----------------------------------------------
