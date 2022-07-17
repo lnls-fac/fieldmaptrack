@@ -126,8 +126,8 @@ class FieldMap:
 
     def __init__(self,
                  fname=None,
+                 content=None,
                  field_function=None,
-                 polyfit_exponents=None,
                  rotation=0.0,
                  translation=(0, 0),
                  transforms=None,
@@ -155,10 +155,16 @@ class FieldMap:
         # spacing between consecutive coordinate values:
         self.rx_step, self.step, self.rz_step = None, None, None
 
-        if self.field_function is None and self.filename is None:
-            raise IrregularFieldMap('source of field not defined!')
-        if self.field_function is not None and self.filename is not None:
-            raise IrregularFieldMap('two sources of field defined!')
+        if content is None:
+            if self.field_function is None and self.filename is None:
+                raise IrregularFieldMap('source of field not defined!')
+            if self.field_function is not None and self.filename is not None:
+                raise IrregularFieldMap(
+                    'more than one source of field defined!')
+        else:
+            if self.field_function is not None or self.filename is not None:
+                raise IrregularFieldMap(
+                    'more than one source of field defined!')
 
         # bx, by and bz field components of the fieldmap
         # ----------------------------------------------
@@ -187,14 +193,18 @@ class FieldMap:
         # these estimates are stored in the lists below.
         #
 
-        # reads fieldmap from givem filename
-        if self.filename is not None:
-            self.read_fieldmap(self.filename)
+        if content is not None:
+            # reads fieldmap from given content
+            self.read_fieldmap(content=content)
+        elif self.filename is not None:
+            # reads fieldmap from given filename
+            self.read_fieldmap(fname=self.filename)
 
-    def read_fieldmap(self, fname):
+    def read_fieldmap(self, fname=None, content=None):
         """."""
-        with open(fname, 'r') as fp:
-            content = fp.read()
+        if content is None:
+            with open(fname, 'r') as fp:
+                content = fp.read()
 
         ''' finds index of data section start '''
         idx = content.find('Z[mm]')
