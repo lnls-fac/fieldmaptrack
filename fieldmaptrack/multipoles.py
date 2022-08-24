@@ -242,10 +242,10 @@ class Multipoles:
 
         # TODO: make algorithm == 'numpy' the only option of this method.
         # need to test with real fieldmap analysis.
-        if algorithm is 'lstsq':
+        if algorithm == 'lstsq':
             r = _np.linalg.lstsq(X, b)
             coeffs = r[0][:, 0]
-        elif algorithm is 'numpy':
+        elif algorithm == 'numpy':
             coeffs = _np.polynomial.polynomial.polyfit(x, y, deg=monomials)
             coeffs = coeffs[monomials]
         else:
