@@ -21,7 +21,7 @@ class Config:
                 line = line.strip()
                 if len(line) == 0:
                     continue
-                if line[0] is not '#':
+                if line[0] != '#':
                     attribute, _, value = line.partition(' ')
                     value = value.strip()
                     strcode = 'self.{0} = {1}'.format(attribute, value)
