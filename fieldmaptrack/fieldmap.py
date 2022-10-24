@@ -524,57 +524,66 @@ class FieldMap:
     def __str__(self):
         """."""
         r = ''
-        r += '{0:<35s} {1}'.format('timestamp:', self.timestamp)
+        try:
+            r += '{0:<35s} {1}'.format('timestamp:', self.timestamp)
+        except AttributeError:
+            pass
         r += '\n{0:<35s} {1}'.format('filename:', self.filename)
-        r += '\n{0:<35s} {1}'.format('magnet_label:', self.magnet_label)
-        r += '\n{0:<35s} {1} mm'.format('magnet_length:', self.length)
+        try:
+            r += '\n{0:<35s} {1}'.format('magnet_label:', self.magnet_label)
+        except AttributeError:
+            pass
+        try:
+            r += '\n{0:<35s} {1} mm'.format('magnet_length:', self.length)
+        except AttributeError:
+            pass
         try:
             r += '\n{0:<35s} {1} A'.format('main_coil_current:', self.current)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('main_coil_NI:', self.ni)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('trim_coil_current:', self.current_trim)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('trim_coil_NI:', self.ni_trim)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('qs_coil_current:', self.current_qs)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('qs_coil_NI:', self.ni_qs)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('ch_coil_current:', self.current_ch)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('ch_coil_NI:', self.ni_ch)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('cv_coil_current:', self.current_cv)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} A'.format('cv_coil_NI:', self.ni_cv)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} mm'.format('magnetic_gap:', self.gap)
-        except:
+        except AttributeError:
             pass
         try:
             r += '\n{0:<35s} {1} mm'.format('control_gap:', self.control_gap)
-        except:
+        except AttributeError:
             pass
 
         if self.ry_nrpts == 1:
