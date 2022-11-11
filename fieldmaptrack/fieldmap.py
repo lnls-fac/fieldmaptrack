@@ -475,6 +475,15 @@ class FieldMap:
                 raise OutOfRangeRzMax(rstr)
             return (0, 0, 0)
 
+        if rz < self.rz_min:
+            rstr = ('Rz extrapolation rz = {0:f} < rz_min = '
+                    '{1:f} [mm]').format(rz, self.rz_min)
+            if self.not_raise_range_exceptions:
+                print(rstr)
+            else:
+                raise OutOfRangeRzMax(rstr)
+            return (0, 0, 0)
+
         if not self.interp3d:
             field = (self.bxf(rx, rz), self.byf(rx, rz), self.bzf(rx, rz))
         else:
