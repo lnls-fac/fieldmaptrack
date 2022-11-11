@@ -27,6 +27,22 @@ class Config:
                     strcode = 'self.{0} = {1}'.format(attribute, value)
                     exec(strcode)
 
+    def __str__(self):
+        """."""
+        r = ''
+        syms = list(self.__dict__.keys())
+        vals = list(self.__dict__.values())
+        mlen = max([len(sym) for sym in syms])
+        sfmt = '\n{:<' + str(mlen) + 's}: {}'
+        for sym, val in zip(syms, vals):
+            if sym == 'beam':
+                r += sfmt.format(sym, '')
+                for line in val.__str__().split('\n'):
+                    r += '\n' + ' ' * (mlen+2) + line
+            else:
+                r += sfmt.format(sym, val)
+        return r[2:]
+
 
 def get_analysis_symbol(magnet_type):
     """Return analysis module according to magnet type."""

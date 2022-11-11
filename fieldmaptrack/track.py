@@ -296,46 +296,60 @@ class Trajectory:
 
     def __str__(self):
         """."""
-        bx, by, bz = \
-            [abs(x) for x in self.bx], [abs(x) for x in self.by], \
-            [abs(x) for x in self.bz]
-        max_bx, max_by, max_bz = max(bx), max(by), max(bz)
-
-        s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx = \
-            self.s[bx.index(max_bx)], self.rx[bx.index(max_bx)], \
-            self.ry[bx.index(max_bx)], self.rz[bx.index(max_bx)]
-        s_max_by, rx_max_by, ry_max_by, rz_max_by = \
-            self.s[by.index(max_by)], self.rx[by.index(max_by)], \
-            self.ry[by.index(max_by)], self.rz[by.index(max_by)]
-        s_max_bz, rx_max_bz, ry_max_bz, rz_max_bz = \
-            self.s[bz.index(max_bz)], self.rx[bz.index(max_bz)], \
-            self.ry[bz.index(max_bz)], self.rz[bz.index(max_bz)]
-        theta_x = math.atan(self.px[-1]/self.pz[-1])
-        theta_y = math.atan(self.py[-1]/self.pz[-1])
-        ref_point = self.calc_reference_point()
-        dtheta_x = theta_x - math.atan(self.px[0]/self.pz[0])
-        dtheta_y = theta_y - math.atan(self.py[0]/self.pz[0])
-
         r = ''
-        r += '{0:<35s} {1:.6e} GeV'.format('beam_energy:', self.beam.energy)
-        r += '\n{0:<35s} {1:+.4e} deg.'.format('horizontal_deflection_angle:',
-                                               dtheta_x * (180.0/math.pi))
-        r += '\n{0:<35s} {1:+.4e} deg.'.format('vertical_deflection_angle:',
-                                               dtheta_y * (180.0/math.pi))
-        r += '\n{0:<35s} {1:+.4e} deg.'.format('final_horizontal_angle:',
-                                               theta_x * (180.0/math.pi))
-        r += '\n{0:<35s} {1:+.4e} deg.'.format('final_vertical_angle:',
-                                               theta_y * (180.0/math.pi))
-        r += '\n{0:<35s} {1} mm'.format('trajectory_length:',
-                                        self.s[-1]-self.s[0])
-        r += '\n{0:<35s} {1}'.format('trajectory_nrpts:', len(self.s))
-        r += '\n{0:<35s} {1} mm'.format('trajectory_s_step:', self.s_step)
+        try:
+            bx, by, bz = \
+                [abs(x) for x in self.bx], [abs(x) for x in self.by], \
+                [abs(x) for x in self.bz]
+            max_bx, max_by, max_bz = max(bx), max(by), max(bz)
 
-        r += '\n{0:<35s} {1:+f} Tesla at (s,rx,ry,rz) = ({2},{3},{4},{5}) mm'.format('max_abs_bx@trajectory:', self.bx[bx.index(max_bx)], s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx)
-        r += '\n{0:<35s} {1:+f} Tesla at (s,rx,ry,rz) = ({2},{3},{4},{5}) mm'.format('max_abs_by@trajectory:', self.by[by.index(max_by)], s_max_by, rx_max_by, ry_max_bx, rz_max_by)
-        r += '\n{0:<35s} {1:+f} Tesla at (s,rx,ry,rz) = ({2},{3},{4},{5}) mm'.format('max_abs_bz@trajectory:', self.bz[bz.index(max_bz)], s_max_bz, rx_max_bz, ry_max_bz, rz_max_bz)
-        r += '\n{0:<35s} {1:+f} mm'.format('rx position of reference point:', ref_point[0])
-        r += '\n{0:<35s} {1:+f} mm'.format('initial rx position of trajectory:', self.rx[0])
+            s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx = \
+                self.s[bx.index(max_bx)], self.rx[bx.index(max_bx)], \
+                self.ry[bx.index(max_bx)], self.rz[bx.index(max_bx)]
+            s_max_by, rx_max_by, ry_max_by, rz_max_by = \
+                self.s[by.index(max_by)], self.rx[by.index(max_by)], \
+                self.ry[by.index(max_by)], self.rz[by.index(max_by)]
+            s_max_bz, rx_max_bz, ry_max_bz, rz_max_bz = \
+                self.s[bz.index(max_bz)], self.rx[bz.index(max_bz)], \
+                self.ry[bz.index(max_bz)], self.rz[bz.index(max_bz)]
+            theta_x = math.atan(self.px[-1]/self.pz[-1])
+            theta_y = math.atan(self.py[-1]/self.pz[-1])
+            ref_point = self.calc_reference_point()
+            dtheta_x = theta_x - math.atan(self.px[0]/self.pz[0])
+            dtheta_y = theta_y - math.atan(self.py[0]/self.pz[0])
+
+            r += '{0:<35s} {1:.6e} GeV'.format(
+                'beam_energy:', self.beam.energy)
+            r += '\n{0:<35s} {1:+.4e} deg.'.format(
+                'horizontal_deflection_angle:', dtheta_x * (180.0/math.pi))
+            r += '\n{0:<35s} {1:+.4e} deg.'.format(
+                'vertical_deflection_angle:', dtheta_y * (180.0/math.pi))
+            r += '\n{0:<35s} {1:+.4e} deg.'.format(
+                'final_horizontal_angle:', theta_x * (180.0/math.pi))
+            r += '\n{0:<35s} {1:+.4e} deg.'.format(
+                'final_vertical_angle:', theta_y * (180.0/math.pi))
+            r += '\n{0:<35s} {1} mm'.format(
+                'trajectory_length:', self.s[-1]-self.s[0])
+            r += '\n{0:<35s} {1}'.format('trajectory_nrpts:', len(self.s))
+            r += '\n{0:<35s} {1} mm'.format('trajectory_s_step:', self.s_step)
+            sfmt = (
+                '\n{0:<35s} {1:+f} Tesla at (s,rx,ry,rz) '
+                '= ({2},{3},{4},{5}) mm')
+            r += sfmt.format('max_abs_bx@trajectory:',
+                self.bx[bx.index(max_bx)],
+                s_max_bx, rx_max_bx, ry_max_bx, rz_max_bx)
+            r += sfmt.format('max_abs_by@trajectory:',
+                self.by[by.index(max_by)],
+                s_max_by, rx_max_by, ry_max_bx, rz_max_by)
+            r += sfmt.format('max_abs_bz@trajectory:',
+                self.bz[bz.index(max_bz)],
+                s_max_bz, rx_max_bz, ry_max_bz, rz_max_bz)
+            r += '\n{0:<35s} {1:+f} mm'.format(
+                'rx position of reference point:', ref_point[0])
+            r += '\n{0:<35s} {1:+f} mm'.format(
+                'initial rx position of trajectory:', self.rx[0])
+        except AttributeError:
+            pass
         return r
 
     def save(self, filename):

@@ -102,7 +102,8 @@ class Multipoles:
             fieldmap_field = self.trajectory.fieldmap.interpolate_set(points)
             if is_ref_trajectory_flag:
                 # trajectory is a reference trajectory
-                field = fieldmap_field - _np.tile(reference_field[:,i].reshape((3,1)), (1, len(grid)))
+                field = fieldmap_field - _np.tile(
+                    reference_field[:,i].reshape((3,1)), (1, len(grid)))
                 self.skew_multipoles[:,i], max_error = self.polyfit(
                     grid_meter, field[0,:], skew_field_monomials)
                 self.max_fit_error_skew = max_error if max_error[0] > self.max_fit_error_skew[0] else self.max_fit_error_skew
