@@ -97,26 +97,25 @@ class Trajectory:
         return (b, 0.0)
 
     def calc_field(self, rx, ry, rz):
-        """."""
+        """This function returns the field components in the following order:
+            Horizontal (Bx), Vertical (By), and Longitudinal (Bz)"""
+
         if self.radia_model is not None:
-            bfield = self.radia_model.get_field_at_point([rx, ry, rz])
-            bx, by, bz = bfield
-            # print("Getting field at point: {}, {}, {}".format(rx, ry, rz))
-        else:
-            try:
-                bx, by, bz = self.fieldmap.interpolate(rx, ry, rz)
-            except (fieldmap.OutOfRangeRx,
-                    fieldmap.OutOfRangeRxMin,
-                    fieldmap.OutOfRangeRy):
-                rstr = 'extrapolation at ' + str((rx, ry, rz))
-                if self.not_raise_range_exceptions:
-                    print(rstr)
-                    bx, by, bz = 0.0, 0.0, 0.0
-                else:
-                    raise TrackException(rstr)
-            except fieldmap.OutOfRangeRz:
-                bx, by, bz = 0.0, 0.0, 0.0
-        return bx, by, bz
+            return self.radia_model.get_field_at_point([rx, ry, rz])
+
+        try:
+            return self.fieldmap.interpolate(rx, ry, rz)
+        except (fieldmap.OutOfRangeRx,
+                fieldmap.OutOfRangeRxMin,
+                fieldmap.OutOfRangeRy):
+            rstr = 'extrapolation at ' + str((rx, ry, rz))
+            if self.not_raise_range_exceptions:
+                print(rstr)
+                return 0.0, 0.0, 0.0
+            raise TrackException(rstr)
+        except fieldmap.OutOfRangeRz:
+            return 0.0, 0.0, 0.0
+
 
     def calc_force(self, alpha, p):
         """."""
