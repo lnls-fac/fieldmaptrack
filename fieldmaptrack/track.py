@@ -116,7 +116,6 @@ class Trajectory:
         except fieldmap.OutOfRangeRz:
             return 0.0, 0.0, 0.0
 
-
     def calc_force(self, alpha, p):
         """."""
         rx, ry, rz, px, py, pz = p
