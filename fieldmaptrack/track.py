@@ -71,10 +71,12 @@ class Trajectory:
     def __init__(self,
                  beam=None,
                  fieldmap=None,
+                 radia_model=None,
                  not_raise_range_exceptions=False):
         """."""
         self.beam = beam
         self.fieldmap = fieldmap
+        self.radia_model = radia_model
         self.not_raise_range_exceptions = not_raise_range_exceptions
 
     def calc_trajectory(self, **kwargs):
@@ -94,23 +96,31 @@ class Trajectory:
         b = 0.5*((x1+x2) - a * (z1+z2))
         return (b, 0.0)
 
-    def calc_force(self, alpha, p):
-        """."""
-        rx, ry, rz, px, py, pz = p
-        # calcs magnetic field on current position
+    def calc_field(self, rx, ry, rz):
+        """This function returns the field components in the following order:
+            Horizontal (Bx), Vertical (By), and Longitudinal (Bz)"""
+
+        if self.radia_model is not None:
+            return self.radia_model.get_field_at_point([rx, ry, rz])
+
         try:
-            bx, by, bz = self.fieldmap.interpolate(rx, ry, rz)
+            return self.fieldmap.interpolate(rx, ry, rz)
         except (fieldmap.OutOfRangeRx,
                 fieldmap.OutOfRangeRxMin,
                 fieldmap.OutOfRangeRy):
             rstr = 'extrapolation at ' + str((rx, ry, rz))
             if self.not_raise_range_exceptions:
                 print(rstr)
-                bx, by, bz = 0.0, 0.0, 0.0
-            else:
-                raise TrackException(rstr)
+                return 0.0, 0.0, 0.0
+            raise TrackException(rstr)
         except fieldmap.OutOfRangeRz:
-            bx, by, bz = 0.0, 0.0, 0.0
+            return 0.0, 0.0, 0.0
+
+    def calc_force(self, alpha, p):
+        """."""
+        rx, ry, rz, px, py, pz = p
+        # calcs magnetic field on current position
+        bx, by, bz = self.calc_field(rx, ry, rz)
 
         # calcs derivatives of the eqs. of motion
         derivs = np.zeros(p.shape)
