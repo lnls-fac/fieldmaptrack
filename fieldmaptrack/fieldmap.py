@@ -355,7 +355,7 @@ class FieldMap:
             if cmd == 'gap[mm]:':
                 try:
                     self.gap = float(words[1])  # [mm]
-                except ValueError:
+                except (ValueError, IndexError):
                     self.gap = None
                 continue
             if cmd == 'control_gap[mm]:' or cmd == 'gap_controle[mm]:':
@@ -365,7 +365,10 @@ class FieldMap:
                     self.control_gap = None
                 continue
             if cmd == 'magnet_length[mm]:' or cmd == 'comprimento[mm]:':
-                self.length = float(words[1])  # [mm]
+                try:
+                    self.length = float(words[1])  # [mm]
+                except (ValueError, IndexError):
+                    self.length = None
                 continue
             if cmd == 'current_main[a]:' or cmd == 'corrente[a]:':
                 try:
